@@ -37,3 +37,778 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
 
 /* V2.9 Roles & Access */
 .permission-table{width:100%;border-collapse:collapse;min-width:980px}.permission-table th,.permission-table td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:12px;text-align:center}.permission-table th:first-child,.permission-table td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:1}.permission-check{width:18px;height:18px;accent-color:var(--brand)}.role-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}.role-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.role-card h3{margin:0 0 6px}.role-card .meta{font-size:12px;color:var(--muted)}.danger-zone{border:1px solid #efd0d0;background:#fff8f8;border-radius:14px;padding:14px}.permission-denied{max-width:620px;margin:60px auto;text-align:center;background:#fff;border:1px solid var(--line);border-radius:20px;padding:34px}.bulk-select{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bulk-select label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
+
+
+
+/* ============================================================
+   V3.3 BUTTON VISIBILITY / CONSISTENCY FIX
+   Ensures button variants remain visible inside tables, modals,
+   toolbars, cards, mobile layouts, and row-action containers.
+   ============================================================ */
+
+/* Universal button readability */
+button,
+.btn,
+.icon-btn,
+.link-btn,
+.row-actions button{
+  opacity:1;
+  visibility:visible;
+  text-shadow:none;
+  -webkit-text-fill-color:currentColor;
+}
+
+/* Standard button variants */
+.btn,
+button.btn{
+  min-height:38px;
+  border:1px solid transparent;
+  border-radius:11px;
+  padding:9px 13px;
+  font-weight:750;
+  line-height:1.2;
+}
+
+.btn-primary,
+button.btn-primary{
+  background:var(--brand);
+  color:#fff;
+  border-color:var(--brand);
+}
+.btn-primary:hover,
+button.btn-primary:hover{
+  background:var(--brand-2);
+  color:#fff;
+  border-color:var(--brand-2);
+}
+
+.btn-soft,
+button.btn-soft{
+  background:#e8f0eb;
+  color:#174c37;
+  border-color:#cfded4;
+}
+.btn-soft:hover,
+button.btn-soft:hover{
+  background:#dbe9df;
+  color:#113c2c;
+  border-color:#bfd3c6;
+}
+
+.btn-outline,
+button.btn-outline{
+  background:#fff;
+  color:#174c37;
+  border-color:#aebfb5;
+}
+.btn-outline:hover,
+button.btn-outline:hover{
+  background:#f1f6f3;
+  color:#113c2c;
+  border-color:#8eaa9a;
+}
+
+.btn-danger,
+button.btn-danger{
+  background:var(--danger);
+  color:#fff;
+  border-color:var(--danger);
+}
+.btn-danger:hover,
+button.btn-danger:hover{
+  background:#963737;
+  color:#fff;
+  border-color:#963737;
+}
+
+/* Critical fix:
+   .row-actions button previously forced every button to white,
+   overriding .btn-primary such as Add Payment. */
+.row-actions{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.row-actions button{
+  min-height:34px;
+  border-radius:9px;
+  padding:7px 10px;
+  font-size:11px;
+  font-weight:700;
+  background:#fff;
+  color:#183026;
+  border:1px solid #cfdad3;
+}
+.row-actions button:hover{
+  background:#f0f5f2;
+  color:#102b22;
+  border-color:#aebfb5;
+}
+
+/* Preserve semantic button colors inside row-actions */
+.row-actions .btn-primary,
+.row-actions button.btn-primary{
+  background:var(--brand);
+  color:#fff;
+  border-color:var(--brand);
+}
+.row-actions .btn-primary:hover,
+.row-actions button.btn-primary:hover{
+  background:var(--brand-2);
+  color:#fff;
+  border-color:var(--brand-2);
+}
+.row-actions .btn-soft,
+.row-actions button.btn-soft{
+  background:#e8f0eb;
+  color:#174c37;
+  border-color:#cfded4;
+}
+.row-actions .btn-outline,
+.row-actions button.btn-outline{
+  background:#fff;
+  color:#174c37;
+  border-color:#aebfb5;
+}
+.row-actions .btn-danger,
+.row-actions button.btn-danger{
+  background:var(--danger);
+  color:#fff;
+  border-color:var(--danger);
+}
+
+/* Buttons generated without a semantic class remain clearly visible */
+.table-panel button:not(.btn-primary):not(.btn-danger):not(.btn-soft):not(.btn-outline),
+.role-card button:not(.btn-primary):not(.btn-danger):not(.btn-soft):not(.btn-outline){
+  background:#fff;
+  color:#183026;
+  border:1px solid #c7d4cc;
+}
+.table-panel button:not(.btn-primary):not(.btn-danger):not(.btn-soft):not(.btn-outline):hover,
+.role-card button:not(.btn-primary):not(.btn-danger):not(.btn-soft):not(.btn-outline):hover{
+  background:#edf4ef;
+  color:#113c2c;
+  border-color:#9fb6a8;
+}
+
+/* Modal footer buttons should always have clear contrast */
+.modal-footer .btn-primary{
+  background:var(--brand);
+  color:#fff;
+  border-color:var(--brand);
+}
+.modal-footer .btn-soft{
+  background:#e8f0eb;
+  color:#174c37;
+  border-color:#cfded4;
+}
+.modal-footer .btn-danger{
+  background:var(--danger);
+  color:#fff;
+  border-color:var(--danger);
+}
+
+/* Icon / close buttons */
+.icon-btn,
+.modal-close{
+  background:#fff;
+  color:#183026;
+  border:1px solid #cbd8cf;
+}
+.icon-btn:hover,
+.modal-close:hover{
+  background:#eef4ef;
+  color:#102b22;
+  border-color:#a7bbaF;
+}
+
+/* Keyboard accessibility / visible focus */
+button:focus-visible,
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.link-btn:focus-visible{
+  outline:3px solid rgba(35,106,79,.28);
+  outline-offset:2px;
+}
+
+/* Disabled state is still visible, but clearly disabled */
+button:disabled,
+.btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  filter:none;
+}
+
+/* Keep action buttons legible on narrow screens */
+@media(max-width:620px){
+  .row-actions button,
+  .row-actions .btn{
+    min-height:38px;
+    padding:8px 10px;
+  }
+  .modal-footer{
+    flex-wrap:wrap;
+  }
+  .modal-footer .btn{
+    min-width:110px;
+  }
+}
+
+
+
+/* ============================================================
+   V3.4 RESPONSIVE SYSTEM OVERHAUL
+   Mobile / iPhone / Android / Tablet / iPad
+   Goal: no horizontal page scroll; vertical scrolling only.
+   ============================================================ */
+
+/* Safer responsive defaults */
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+}
+img,svg,canvas,video{
+  max-width:100%;
+  height:auto;
+}
+input,select,textarea,button{
+  max-width:100%;
+}
+.content,
+.main-wrap,
+.view,
+.panel,
+.table-panel,
+.modal-box,
+.login-card{
+  min-width:0;
+}
+
+/* Prevent long codes/emails/booking numbers from forcing overflow */
+td,th,p,span,strong,small,label,.list-item,.unit-meta,.meta,.badge{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+/* Tablets / iPad landscape */
+@media (max-width:1180px){
+  :root{--sidebar:230px}
+
+  .content{
+    padding:20px;
+  }
+
+  .stats-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .stats-grid.small{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .dashboard-grid,
+  .settings-grid{
+    grid-template-columns:1fr;
+  }
+
+  .scanner-layout{
+    grid-template-columns:1fr;
+  }
+
+  .form-panel .form-grid,
+  .modal-form{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .live-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .table-scroll{
+    width:100%;
+    max-width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .data-table{
+    min-width:780px;
+  }
+}
+
+/* iPad portrait / small tablets */
+@media (max-width:900px){
+  :root{--sidebar:0px}
+
+  .sidebar{
+    position:fixed;
+    inset:0 0 auto 0;
+    width:100%;
+    height:auto;
+    max-height:none;
+    padding:8px 10px;
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    gap:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+
+  .brand{
+    flex:0 0 auto;
+    min-width:max-content;
+    padding:4px 10px 4px 4px;
+    border-bottom:0;
+    border-right:1px solid rgba(255,255,255,.09);
+  }
+
+  .brand img{
+    width:38px;
+    height:38px;
+  }
+
+  .brand strong{
+    font-size:13px;
+  }
+
+  .brand span{
+    display:none;
+  }
+
+  .main-nav{
+    display:flex;
+    gap:4px;
+    padding:0;
+    min-width:max-content;
+  }
+
+  .nav-link{
+    flex:0 0 auto;
+    white-space:nowrap;
+    padding:9px 11px;
+  }
+
+  .sidebar-footer{
+    display:none;
+  }
+
+  .main-wrap{
+    margin-left:0;
+    padding-top:64px;
+  }
+
+  .topbar{
+    height:auto;
+    min-height:66px;
+    padding:10px 16px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .topbar-title h1{
+    font-size:19px;
+  }
+
+  .topbar-actions{
+    width:auto;
+    max-width:100%;
+    flex-wrap:wrap;
+  }
+
+  .content{
+    padding:16px;
+  }
+
+  .section-head{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .filter-strip,
+  .table-toolbar{
+    width:100%;
+  }
+
+  .filter-strip input,
+  .filter-strip select,
+  .table-toolbar input,
+  .table-toolbar select{
+    flex:1 1 180px;
+    min-width:0;
+    max-width:none;
+  }
+
+  .filter-strip.compact input,
+  .filter-strip.compact select{
+    max-width:none;
+  }
+
+  .stats-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .live-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .modal-backdrop{
+    align-items:flex-end;
+    padding:8px;
+  }
+
+  .modal-box{
+    width:100%;
+    max-width:100%;
+    max-height:92dvh;
+    border-radius:18px 18px 8px 8px;
+  }
+
+  .modal-head,
+  .modal-body,
+  .modal-footer{
+    padding-left:16px;
+    padding-right:16px;
+  }
+
+  .modal-footer{
+    position:sticky;
+    bottom:0;
+    background:#fff;
+    z-index:2;
+  }
+
+  .modal-form{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .report-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+/* iPhone / Android phones */
+@media (max-width:620px){
+  body{
+    font-size:14px;
+  }
+
+  .sidebar{
+    padding:7px 8px;
+  }
+
+  .brand{
+    padding-right:8px;
+  }
+
+  .brand img{
+    width:34px;
+    height:34px;
+  }
+
+  .brand strong{
+    font-size:12px;
+  }
+
+  .nav-link{
+    padding:8px 9px;
+    font-size:12px;
+  }
+
+  .nav-link span{
+    width:auto;
+  }
+
+  .main-wrap{
+    padding-top:58px;
+  }
+
+  .topbar{
+    padding:9px 12px;
+  }
+
+  .topbar-title{
+    min-width:0;
+  }
+
+  .topbar-title h1{
+    font-size:17px;
+    line-height:1.2;
+  }
+
+  .topbar-title p{
+    font-size:11px;
+  }
+
+  .topbar-actions{
+    width:100%;
+    gap:6px;
+  }
+
+  .topbar-actions .btn,
+  .topbar-actions .icon-btn{
+    flex:1 1 auto;
+  }
+
+  .content{
+    padding:12px;
+  }
+
+  .section-head h2{
+    font-size:21px;
+  }
+
+  .stats-grid,
+  .stats-grid.small,
+  .dashboard-grid,
+  .settings-grid,
+  .live-grid,
+  .mini-status-grid{
+    grid-template-columns:1fr;
+  }
+
+  .stat-card{
+    padding:14px;
+  }
+
+  .stat-card strong{
+    font-size:23px;
+  }
+
+  .panel{
+    padding:14px;
+    border-radius:14px;
+  }
+
+  .table-panel{
+    border-radius:14px;
+  }
+
+  .table-toolbar{
+    padding:10px;
+    gap:7px;
+  }
+
+  .filter-strip,
+  .filter-strip.compact,
+  .table-toolbar{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .filter-strip input,
+  .filter-strip select,
+  .filter-strip button,
+  .table-toolbar input,
+  .table-toolbar select,
+  .table-toolbar button{
+    width:100%;
+    min-width:0;
+    max-width:none;
+  }
+
+  /* Keep only table itself horizontally scrollable when unavoidable */
+  .table-scroll{
+    margin:0;
+    width:100%;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .data-table{
+    min-width:680px;
+  }
+
+  .data-table th,
+  .data-table td{
+    padding:10px 9px;
+    font-size:11px;
+  }
+
+  .data-table th{
+    font-size:9px;
+  }
+
+  .row-actions{
+    gap:5px;
+  }
+
+  .row-actions button,
+  .row-actions .btn{
+    min-height:36px;
+    padding:7px 9px;
+    white-space:nowrap;
+  }
+
+  .scanner-layout{
+    display:block;
+  }
+
+  .scanner-panel{
+    width:100%;
+  }
+
+  .barcode-input{
+    font-size:16px;
+    padding:14px 10px;
+  }
+
+  .form-panel .form-grid,
+  .modal-form{
+    grid-template-columns:1fr;
+  }
+
+  .modal-form .full,
+  .form-panel .full{
+    grid-column:1;
+  }
+
+  .modal-backdrop{
+    padding:0;
+  }
+
+  .modal-box{
+    width:100%;
+    max-width:100%;
+    max-height:96dvh;
+    border-radius:16px 16px 0 0;
+  }
+
+  .modal-head{
+    padding:14px;
+  }
+
+  .modal-head h3{
+    font-size:18px;
+  }
+
+  .modal-body{
+    padding:14px;
+  }
+
+  .modal-footer{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    padding:12px;
+  }
+
+  .modal-footer .btn,
+  .modal-footer button{
+    width:100%;
+    min-width:0;
+    margin:0;
+  }
+
+  .modal-footer > :only-child{
+    grid-column:1 / -1;
+  }
+
+  .report-kpis{
+    grid-template-columns:1fr !important;
+  }
+
+  .report-kpi{
+    min-width:0 !important;
+  }
+
+  .unit-card{
+    padding:14px;
+  }
+
+  .list-item{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .logo-preview-wrap{
+    height:150px;
+  }
+
+  .logo-preview{
+    max-width:120px;
+    max-height:110px;
+  }
+
+  /* Login becomes single-column on phones */
+  .login-screen{
+    display:block;
+    min-height:100dvh;
+  }
+
+  .login-brand-panel{
+    display:none;
+  }
+
+  .login-form-panel{
+    min-height:100dvh;
+    padding:18px 14px;
+    align-items:center;
+  }
+
+  .login-card{
+    width:100%;
+    padding:24px 18px;
+    border-radius:18px;
+  }
+
+  .mobile-login-brand{
+    display:block;
+    text-align:center;
+    margin-bottom:18px;
+  }
+
+  .mobile-login-brand img{
+    width:82px;
+    height:82px;
+  }
+}
+
+/* Very small iPhones / narrow Android devices */
+@media (max-width:390px){
+  .content{
+    padding:10px;
+  }
+
+  .topbar{
+    padding:8px 10px;
+  }
+
+  .section-head h2{
+    font-size:19px;
+  }
+
+  .btn,
+  .icon-btn{
+    font-size:12px;
+  }
+
+  .modal-footer{
+    grid-template-columns:1fr;
+  }
+
+  .data-table{
+    min-width:620px;
+  }
+}
+
+/* iPad/iPhone safe-area support */
+@supports (padding: max(0px)){
+  .sidebar{
+    padding-left:max(8px, env(safe-area-inset-left));
+    padding-right:max(8px, env(safe-area-inset-right));
+  }
+
+  .main-wrap{
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+
+  .modal-footer{
+    padding-bottom:max(12px, env(safe-area-inset-bottom));
+  }
+}

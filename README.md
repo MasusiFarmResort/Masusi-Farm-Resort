@@ -139,3 +139,15 @@ The Booking Barcode / QR print action now prints only a clean card containing th
 
 ## V3.1 Security Hardening + QR/Barcode PNG Export
 This update adds strict page/action RLS policies for the main resort tables, removes legacy broad staff policies, and adds dedicated **Save QR PNG** and **Save Barcode PNG** actions in the Booking Barcode / QR modal. The print action now uses a more professional booking card layout while still showing only the requested minimal details.
+
+
+## V3.2 Pax QR and Live View Barcode Buttons
+Pax/Companion Barcode Manager now has a **Show QR** action for every pax with an assigned code. Live View details for Rooms and Cottages now include **View Booking Barcode** and **View Pax Barcodes** shortcuts. Running Account modals also include the same barcode shortcuts.
+
+
+## V3.3 Button Visibility & CSS Consistency
+Reviewed the global button CSS and fixed specificity conflicts that caused semantic buttons such as **Add Payment** to appear white inside `.row-actions`. Primary, soft, outline, danger, modal-footer, table-action, icon, hover, focus, disabled, and mobile button states now have explicit readable contrast.
+
+
+## V3.4 Mobile / Tablet / iPad Responsive Overhaul
+The entire system CSS was reviewed for smaller screens. The main layout no longer requires page-level horizontal scrolling. On tablets the sidebar becomes a horizontal top navigation strip, while phones use a compact top nav and single-column content. Tables remain horizontally scrollable only inside their own table container when the number of columns makes it unavoidable.
