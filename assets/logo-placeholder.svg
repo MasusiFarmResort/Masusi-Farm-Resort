@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<rect width="240" height="240" rx="48" fill="#174c37"/>
+<circle cx="120" cy="92" r="54" fill="#c69a4a" opacity=".96"/>
+<path d="M45 156c34-18 64-23 95-9 23 10 38 8 55-2v45H45z" fill="#e7efe9"/>
+<path d="M55 142c22-36 47-54 75-54 23 0 43 11 59 32-31-10-57-6-82 13-16 12-33 15-52 9z" fill="#174c37"/>
+<path d="M104 111c8-24 24-41 46-51-5 20-5 38 0 54-15-7-30-8-46-3z" fill="#f4f0df"/>
+<text x="120" y="214" text-anchor="middle" fill="#fff" font-family="Arial" font-size="22" font-weight="700">MFR</text>
+</svg>

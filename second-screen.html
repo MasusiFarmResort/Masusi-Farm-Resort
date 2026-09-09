@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masusi Farm Resort — Live Display</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{background:#0d2e22;color:#fff}.display-shell{padding:24px}.display-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.display-brand{display:flex;gap:14px;align-items:center}.display-brand img{width:72px;height:72px}.display-brand h1{margin:0;font-size:34px}.display-brand p{margin:4px 0 0;color:#cfe0d6}.display-clock{text-align:right}.display-clock strong{font-size:30px}.display-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.unit-card{background:#fff;color:#183026;min-height:150px}.display-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.display-summary>div{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);padding:14px;border-radius:14px}.display-summary strong{display:block;font-size:28px}.display-summary span{font-size:11px;color:#cfe0d6;text-transform:uppercase}.privacy{font-size:11px;color:#9eb6aa;margin-top:18px}@media(max-width:700px){.display-summary{grid-template-columns:repeat(2,1fr)}.display-brand h1{font-size:24px}.display-clock strong{font-size:20px}.display-shell{padding:14px}}
+</style>
+</head>
+<body>
+<div class="display-shell">
+  <header class="display-head">
+    <div class="display-brand"><img id="displayLogo" src="assets/logo-placeholder.svg"><div><h1 id="displayName">Masusi Farm Resort</h1><p>Live Rooms & Cottages</p></div></div>
+    <div class="display-clock"><strong id="clock"></strong><div id="displayDate"></div></div>
+  </header>
+  <div id="displaySummary" class="display-summary"></div>
+  <div id="displayGrid" class="display-grid"></div>
+  <p class="privacy">Read-only operations display. Guest names, balances and sensitive details are intentionally hidden.</p>
+</div>
+<script src="config.js"></script>
+<script>
+const c=window.MASUSI_CONFIG||{}, ok=c.SUPABASE_URL&&!c.SUPABASE_URL.includes("PASTE_"), s=ok?window.supabase.createClient(c.SUPABASE_URL,c.SUPABASE_ANON_KEY):null;
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const date=new URLSearchParams(location.search).get("date")||new Date().toISOString().slice(0,10);
+let rooms=[],cottages=[],bookings=[],pax=[];
+function active(type,id){return bookings.find(b=>{const a=type==="room"?b.room_id===id:b.cottage_id===id;if(!a||["cancelled","checked_out"].includes(b.status))return false;const st=b.check_in_date||b.booking_date,en=b.check_out_date||st;return date>=st&&date<=en})}
+function status(type,u){if(["maintenance","damaged","cleaning"].includes(u.status))return u.status;const b=active(type,u.id);return b?(b.status==="confirmed"?"reserved":"occupied"):"available"}
+async function load(){
+ if(!s){document.body.innerHTML="<div style='padding:40px'>Configure config.js first.</div>";return}
+ const [{data:r},{data:ct},{data:b},{data:px},{data:set}]=await Promise.all([s.from("rooms").select("*").eq("is_active",true),s.from("cottages").select("*").eq("is_active",true),s.from("bookings").select("*"),s.from("booking_pax").select("*"),s.from("system_settings").select("*").eq("id",1).maybeSingle()]);
+ rooms=r||[];cottages=ct||[];bookings=b||[];pax=px||[];if(set){displayName.textContent=set.resort_name||"Masusi Farm Resort";if(set.logo_url)displayLogo.src=set.logo_url}draw();
+}
+function draw(){
+ const units=[...rooms.map(x=>({...x,t:"room"})),...cottages.map(x=>({...x,t:"cottage"}))].map(u=>({...u,st:status(u.t,u),b:active(u.t,u.id)}));
+ const counts={available:0,occupied:0,reserved:0,other:0};units.forEach(u=>counts[u.st]!==undefined?counts[u.st]++:counts.other++);
+ displaySummary.innerHTML=[["Available",counts.available],["Occupied",counts.occupied],["Reserved",counts.reserved],["Cleaning / Maint.",counts.other]].map(x=>`<div><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+ displayGrid.innerHTML=units.map(u=>{const group=u.b?pax.filter(p=>p.booking_id===u.b.id&&p.access_status!=='cancelled'):[];const g=group.length|| (u.b?Number(u.b.adults||0)+Number(u.b.kids||0)+Number(u.b.babies||0):0);const inside=group.filter(p=>p.access_status==='inside').length;const outside=group.filter(p=>p.access_status==='outside').length;return `<article class="unit-card ${u.st}"><div class="eyebrow">${u.t.toUpperCase()}</div><h3>${esc(u.name||u.unit_number)}</h3><span class="status">${esc(u.st)}</span><div class="unit-meta"><span>${u.b?g+" pax · Inside "+inside+" · Outside "+outside:"No active booking"}</span>${u.b?`<span>${Number(u.b.adults||0)} adult · ${Number(u.b.kids||0)} kids · ${Number(u.b.babies||0)} baby</span>`:""}</div></article>`}).join("");
+}
+function tick(){const d=new Date();clock.textContent=d.toLocaleTimeString("en-PH",{hour:"2-digit",minute:"2-digit"});displayDate.textContent=d.toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
+tick();setInterval(tick,1000);load();
+if(s)s.channel("live-display").on("postgres_changes",{event:"*",schema:"public",table:"bookings"},load).on("postgres_changes",{event:"*",schema:"public",table:"rooms"},load).on("postgres_changes",{event:"*",schema:"public",table:"cottages"},load).on("postgres_changes",{event:"*",schema:"public",table:"booking_pax"},load).subscribe();
+</script>
+</body></html>

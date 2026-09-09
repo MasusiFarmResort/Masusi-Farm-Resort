@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#143f2e" />
+  <title>Masusi Farm Resort Management System</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/logo-placeholder.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div id="appLoader" class="app-loader">
+    <div class="loader-card">
+      <img src="assets/logo-placeholder.svg" class="loader-logo" alt="Masusi Farm Resort">
+      <div class="spinner"></div>
+      <p>Loading Masusi Farm Resort...</p>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <section id="loginScreen" class="login-screen hidden">
+    <div class="login-brand-panel">
+      <div class="login-brand-overlay"></div>
+      <div class="login-brand-content">
+        <img id="loginLogo" src="assets/logo-placeholder.svg" alt="Masusi Farm Resort logo" class="login-logo">
+        <p class="eyebrow">RESORT MANAGEMENT SYSTEM</p>
+        <h1 id="loginResortName">Masusi Farm Resort</h1>
+        <p class="login-copy">Bookings, rooms, cottages, billing, barcode scanning, expenses, damage tracking and real-time operations in one system.</p>
+      </div>
+    </div>
+    <div class="login-form-panel">
+      <form id="loginForm" class="login-card" autocomplete="on">
+        <div class="mobile-login-brand">
+          <img src="assets/logo-placeholder.svg" alt="" class="mobile-login-logo">
+          <h2>Masusi Farm Resort</h2>
+        </div>
+        <p class="eyebrow">SECURE STAFF ACCESS</p>
+        <h2>Welcome back</h2>
+        <p class="muted">Sign in using your authorized resort account.</p>
+        <label>Email
+          <input id="loginEmail" type="email" autocomplete="username" required placeholder="staff@example.com">
+        </label>
+        <label>Password
+          <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••">
+        </label>
+        <button class="btn btn-primary btn-block" type="submit">Sign In</button>
+        <p id="loginMessage" class="form-message"></p>
+        <p class="tiny muted">Database access is protected by Supabase Auth and Row Level Security.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- MAIN APP -->
+  <div id="appShell" class="app-shell hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="brand">
+        <img id="sidebarLogo" src="assets/logo-placeholder.svg" alt="Masusi Farm Resort">
+        <div>
+          <strong id="sidebarResortName">Masusi Farm Resort</strong>
+          <span>Management System</span>
+        </div>
+      </div>
+      <nav id="mainNav" class="main-nav">
+        <button data-view="dashboard" class="nav-link active"><span>⌂</span> Dashboard</button>
+        <button data-view="live" class="nav-link"><span>◉</span> Live Rooms & Cottages</button>
+        <button data-view="cottage-bookings" class="nav-link"><span>▣</span> Cottage + Ligo</button>
+        <button data-view="room-bookings" class="nav-link"><span>▤</span> Room Bookings</button>
+        <button data-view="bookings" class="nav-link"><span>≡</span> All Bookings</button>
+        <button data-view="availability" class="nav-link"><span>▦</span> Availability</button>
+        <button data-view="rooms" class="nav-link"><span>▤</span> Rooms</button>
+        <button data-view="cottages" class="nav-link"><span>⌂</span> Cottages</button>
+        <button data-view="guests" class="nav-link"><span>♙</span> Guests</button>
+        <button data-view="barcode" class="nav-link"><span>▥</span> Barcode Scanner</button>
+        <button data-view="pos" class="nav-link"><span>▦</span> Store / POS</button>
+        <button data-view="services" class="nav-link"><span>＋</span> Services Library</button>
+        <button data-view="rates" class="nav-link admin-only"><span>₱</span> Rates & Pricing</button>
+        <button data-view="billing" class="nav-link"><span>₱</span> Billing</button>
+        <button data-view="payments" class="nav-link"><span>✓</span> Payments</button>
+        <button data-view="invoices" class="nav-link"><span>▧</span> Invoices</button>
+        <button data-view="expenses" class="nav-link"><span>↘</span> Expenses</button>
+        <button data-view="damages" class="nav-link"><span>!</span> Damages</button>
+        <button data-view="repairs" class="nav-link"><span>⚒</span> Repairs</button>
+        <button data-view="inventory" class="nav-link"><span>▢</span> Inventory</button>
+        <button data-view="reports" class="nav-link"><span>▥</span> Reports</button>
+        <button data-view="users" class="nav-link admin-only"><span>♙</span> Users</button>
+        <button data-view="roles" class="nav-link admin-only"><span>⚿</span> Roles & Access</button>
+        <button data-view="audit" class="nav-link admin-only"><span>≡</span> Audit Logs</button>
+        <button data-view="settings" class="nav-link admin-only"><span>⚙</span> Settings</button>
+      </nav>
+      <div class="sidebar-footer">
+        <span id="sidebarUserName">Staff User</span>
+        <small id="sidebarUserRole">staff</small>
+      </div>
+    </aside>
+
+    <div class="main-wrap">
+      <header class="topbar">
+        <button id="mobileMenuBtn" class="icon-btn mobile-only" aria-label="Menu">☰</button>
+        <div class="topbar-title">
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">Today at Masusi Farm Resort</p>
+        </div>
+        <div class="topbar-actions">
+          <button id="openSecondScreenBtn" class="btn btn-soft">Second Screen</button>
+          <button id="refreshBtn" class="icon-btn" title="Refresh">↻</button>
+          <button id="logoutBtn" class="btn btn-outline">Logout</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- DASHBOARD -->
+        <section id="view-dashboard" class="view active">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">OPERATIONS OVERVIEW</p>
+              <h2>Resort Dashboard</h2>
+            </div>
+            <div class="filter-strip compact">
+              <input type="month" id="dashboardMonth">
+              <select id="dashboardBookingCategory"><option value="">All categories</option></select>
+              <select id="dashboardPaymentStatus">
+                <option value="">All payment status</option><option>unpaid</option><option>partial</option><option>paid</option><option>refunded</option>
+              </select>
+              <button class="btn btn-soft" data-action="print-dashboard">Print</button>
+            </div>
+          </div>
+          <div id="dashboardStats" class="stats-grid"></div>
+          <div class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-head"><h3>Today’s Live Status</h3><button class="link-btn" data-view-jump="live">Open live view</button></div>
+              <div id="dashboardLiveSummary" class="mini-status-grid"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head"><h3>Today’s Bookings</h3><button class="link-btn" data-view-jump="bookings">View all</button></div>
+              <div id="dashboardBookings" class="list-stack"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- LIVE -->
+        <section id="view-live" class="view">
+          <div class="section-head">
+            <div><p class="eyebrow">REAL-TIME OPERATIONS</p><h2>Rooms + Cottages Live Queue</h2></div>
+            <div class="filter-strip compact">
+              <input id="liveDate" type="date">
+              <select id="liveType"><option value="">Rooms + Cottages</option><option value="room">Rooms</option><option value="cottage">Cottages</option></select>
+              <select id="liveStatus"><option value="">All status</option><option>available</option><option>reserved</option><option>occupied</option><option>cleaning</option><option>maintenance</option><option>damaged</option></select>
+              <input id="liveSearch" type="search" placeholder="Search unit or guest">
+              <button class="btn btn-primary" id="fullScreenLiveBtn">Second Screen</button>
+            </div>
+          </div>
+          <div id="liveSummary" class="stats-grid small"></div>
+          <div id="liveQueueGrid" class="live-grid"></div>
+        </section>
+
+        <!-- BOOKING WORKFLOWS -->
+        <section id="view-cottage-bookings" class="view"></section>
+        <section id="view-room-bookings" class="view"></section>
+
+        <!-- GENERIC TABLE VIEWS -->
+        <section id="view-bookings" class="view"></section>
+        <section id="view-availability" class="view"></section>
+        <section id="view-rooms" class="view"></section>
+        <section id="view-cottages" class="view"></section>
+        <section id="view-guests" class="view"></section>
+
+        <!-- BARCODE -->
+        <section id="view-barcode" class="view">
+          <div class="section-head"><div><p class="eyebrow">BLUETOOTH / USB HID READY</p><h2>Barcode Scanner</h2></div></div>
+          <div class="scanner-layout">
+            <article class="panel scanner-panel">
+              <div class="scanner-icon">▥</div>
+              <h3>Scan guest or booking barcode</h3>
+              <p class="muted">Pair a Bluetooth HID barcode scanner with your tablet. Scans are read like keyboard input and searched in Supabase.</p>
+              <input id="barcodeInput" class="barcode-input" type="text" autocomplete="off" placeholder="Scan or enter barcode">
+              <button id="barcodeSearchBtn" class="btn btn-primary btn-block">Find Booking</button>
+              <button id="cameraScanBtn" class="btn btn-soft btn-block" type="button" style="margin-top:8px">Scan with Phone / Tablet Camera</button>
+              <small class="muted">Tip: most scanners can append Enter automatically after each scan. On phones/tablets, use the camera scan button.</small>
+            </article>
+            <article class="panel">
+              <div class="panel-head"><h3>Scan Result</h3></div>
+              <div id="barcodeResult" class="empty-state">No barcode scanned yet.</div>
+            </article>
+          </div>
+        </section>
+
+        <section id="view-pos" class="view"></section>
+        <section id="view-services" class="view"></section>
+        <section id="view-rates" class="view"></section>
+        <section id="view-billing" class="view"></section>
+        <section id="view-payments" class="view"></section>
+        <section id="view-invoices" class="view"></section>
+        <section id="view-expenses" class="view"></section>
+        <section id="view-damages" class="view"></section>
+        <section id="view-repairs" class="view"></section>
+        <section id="view-inventory" class="view"></section>
+
+        <!-- REPORTS -->
+        <section id="view-reports" class="view">
+          <div class="section-head">
+            <div><p class="eyebrow">MONTHLY MANAGEMENT REPORTS</p><h2>Reports</h2></div>
+            <div class="filter-strip compact">
+              <input id="reportsMonth" type="month">
+              <select id="reportType">
+                <option value="bookings">Booking Report</option>
+                <option value="payments">Payment Report</option>
+                <option value="expenses">Expense Report</option>
+                <option value="damages">Damage Report</option>
+                <option value="repairs">Repair Report</option>
+                <option value="occupancy">Occupancy Report</option>
+              </select>
+              <button id="runReportBtn" class="btn btn-primary">Generate</button>
+              <button id="printReportBtn" class="btn btn-soft">Print Report</button>
+            </div>
+          </div>
+          <div id="reportContent"></div>
+        </section>
+
+        <section id="view-users" class="view"></section>
+        <section id="view-roles" class="view"></section>
+        <section id="view-audit" class="view"></section>
+
+        <!-- SETTINGS -->
+        <section id="view-settings" class="view">
+          <div class="section-head"><div><p class="eyebrow">SYSTEM CONFIGURATION</p><h2>Settings</h2></div></div>
+          <div class="settings-grid">
+            <form id="generalSettingsForm" class="panel form-panel">
+              <div class="panel-head"><h3>Resort Identity</h3></div>
+              <label>Resort Name<input name="resort_name" value="Masusi Farm Resort"></label>
+              <label>Address<textarea name="address" rows="3"></textarea></label>
+              <label>Contact Number<input name="contact_number"></label>
+              <label>Email<input name="email" type="email"></label>
+              <label>Invoice Footer<textarea name="invoice_footer" rows="3" placeholder="Thank you for choosing Masusi Farm Resort."></textarea></label>
+              <button class="btn btn-primary" type="submit">Save Settings</button>
+            </form>
+
+            <form id="logoSettingsForm" class="panel form-panel">
+              <div class="panel-head"><h3>Logo Handler</h3></div>
+              <div class="logo-preview-wrap">
+                <img id="logoPreview" src="assets/logo-placeholder.svg" class="logo-preview" alt="Resort logo">
+              </div>
+              <label>Upload Resort Logo<input id="logoFileInput" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"></label>
+              <p class="tiny muted">Recommended: transparent PNG/WebP. The uploaded logo is stored in the Supabase Storage bucket configured by the SQL script.</p>
+              <button class="btn btn-primary" type="submit">Upload & Apply Logo</button>
+              <button class="btn btn-soft" type="button" id="resetLogoBtn">Use Placeholder</button>
+            </form>
+
+            <form id="rulesSettingsForm" class="panel form-panel">
+              <div class="panel-head"><h3>Guest & Discount Rules</h3></div>
+              <div class="form-grid">
+                <label>Adult starts at<input name="adult_age" type="number" min="1" value="13"></label>
+                <label>Child starts at<input name="child_age" type="number" min="0" value="4"></label>
+                <label>Baby max age<input name="baby_age_max" type="number" min="0" value="3"></label>
+                <label>Senior Discount %<input name="senior_discount" type="number" min="0" max="100" step="0.01" value="20"></label>
+                <label>PWD Discount %<input name="pwd_discount" type="number" min="0" max="100" step="0.01" value="20"></label>
+                <div class="full panel" style="margin-top:4px">
+                  <strong>Room Check-in / Check-out Policy</strong>
+                  <p class="tiny muted">Default resort policy: Check-in 2:00 PM · Check-out 11:00 AM on the final day · ₱150 per started hour for early check-in or late check-out.</p>
+                </div>
+                <label>Room Check-in Time<input name="room_check_in_time" type="time" value="14:00"></label>
+                <label>Room Check-out Time<input name="room_check_out_time" type="time" value="11:00"></label>
+                <label>Early / Late Fee per Hour<input name="early_late_hourly_fee" type="number" min="0" step="0.01" value="150"></label>
+                <div class="full panel" style="margin-top:4px"><strong>Tour / Swimming Rates</strong><p class="tiny muted">Day Tour and Night Tour prices are managed in <b>Rates & Pricing</b>. This keeps each tour schedule and price separate.</p></div>
+              </div>
+              <button class="btn btn-primary" type="submit">Save Rules</button>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL SYSTEM -->
+  <div id="modalBackdrop" class="modal-backdrop hidden">
+    <div id="modalBox" class="modal-box" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <div><p id="modalEyebrow" class="eyebrow"></p><h3 id="modalTitle">Modal</h3></div>
+        <button id="modalCloseBtn" class="modal-close" aria-label="Close">×</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+      <div id="modalFooter" class="modal-footer"></div>
+    </div>
+  </div>
+
+  <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script src="operations-v2.js"></script>
+  <script src="operations-v21.js"></script>
+  <script src="operations-v23.js"></script>
+  <script src="operations-v25.js"></script>
+  <script src="operations-v27.js"></script>
+  <script src="operations-v28.js"></script>
+  <script src="operations-v29.js"></script>
+  <script src="operations-v30.js"></script>
+  <script src="operations-v31.js"></script>
+</body>
+</html>
