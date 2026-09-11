@@ -241,3 +241,9 @@ period, generated timestamp, and Pax category breakdown where applicable.
 
 `Professional Print` remains available and now uses the same report-building
 logic as the on-screen preview.
+
+
+## V5.3 Booking Action Priority
+Booking action rows now prioritize **Payment** as a visible action outside the
+`More` menu. **Coupon** is moved into `More`. Existing button handlers are
+preserved because the actual DOM button elements are moved rather than recreated.

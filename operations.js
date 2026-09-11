@@ -6748,3 +6748,98 @@ setTimeout(()=>{
   v52ReportSelectionChanged();
 },120);
 
+/* ============================================================================
+   MASUSI FARM RESORT V5.3
+   BOOKING ACTION PRIORITY
+   Payment stays visible outside. Coupon goes inside More.
+   ============================================================================ */
+
+function v53IsPaymentButton(btn){
+  if(!btn || btn.tagName!=='BUTTON')return false;
+  const t=(btn.textContent||'').trim().toLowerCase();
+  return !!(
+    btn.dataset?.v21Pay ||
+    btn.dataset?.v23Pay ||
+    btn.dataset?.pay ||
+    t==='payment' ||
+    t==='add payment'
+  );
+}
+
+function v53IsCouponButton(btn){
+  if(!btn || btn.tagName!=='BUTTON')return false;
+  const t=(btn.textContent||'').trim().toLowerCase();
+  return !!(
+    btn.dataset?.v39Coupon ||
+    t==='coupon' ||
+    t==='apply coupon' ||
+    t==='change coupon'
+  );
+}
+
+function v53PrioritizePaymentActions(){
+  document.querySelectorAll('.row-actions').forEach(actions=>{
+    const more=actions.querySelector(':scope > details.action-more');
+    if(!more)return;
+
+    const menu=more.querySelector(':scope > .action-more-menu');
+    if(!menu)return;
+
+    const directButtons=[...actions.children].filter(x=>x.tagName==='BUTTON');
+    const directCoupon=directButtons.find(v53IsCouponButton);
+    const directPayment=directButtons.find(v53IsPaymentButton);
+
+    const menuButtons=[...menu.querySelectorAll(':scope > button')];
+    const menuPayment=menuButtons.find(v53IsPaymentButton);
+    const menuCoupon=menuButtons.find(v53IsCouponButton);
+
+    /* Main requested case:
+       Coupon was appended after the old More grouping, so Coupon is visible
+       while Payment remained inside More. Swap their locations. */
+    if(directCoupon && menuPayment){
+      actions.insertBefore(menuPayment, more);
+      menu.appendChild(directCoupon);
+      directCoupon.classList.remove('btn-primary');
+      if(!directCoupon.classList.contains('btn-soft'))directCoupon.classList.add('btn-soft');
+      if(!menuPayment.classList.contains('btn-primary'))menuPayment.classList.add('btn-primary');
+      return;
+    }
+
+    /* If Payment is already visible, make sure Coupon is not also taking
+       a primary outside slot when a More menu exists. */
+    if(directPayment && directCoupon){
+      menu.appendChild(directCoupon);
+      return;
+    }
+
+    /* If both are inside More and there is room to promote Payment, move it
+       outside directly before More. */
+    if(!directPayment && menuPayment && !directCoupon){
+      actions.insertBefore(menuPayment, more);
+      if(!menuPayment.classList.contains('btn-primary'))menuPayment.classList.add('btn-primary');
+    }
+
+    /* If coupon is inside More already, keep it there. */
+    if(menuCoupon){
+      menuCoupon.classList.remove('btn-primary');
+      if(!menuCoupon.classList.contains('btn-soft'))menuCoupon.classList.add('btn-soft');
+    }
+  });
+}
+
+let v53ActionSweepQueued=false;
+function v53QueueActionSweep(){
+  if(v53ActionSweepQueued)return;
+  v53ActionSweepQueued=true;
+  requestAnimationFrame(()=>{
+    v53ActionSweepQueued=false;
+    v53PrioritizePaymentActions();
+  });
+}
+
+const v53ActionObserver=new MutationObserver(v53QueueActionSweep);
+v53ActionObserver.observe(document.body,{childList:true,subtree:true});
+
+document.addEventListener('DOMContentLoaded',()=>setTimeout(v53PrioritizePaymentActions,150));
+setTimeout(v53PrioritizePaymentActions,300);
+

@@ -2919,3 +2919,15 @@ pre{
     flex-direction:column;
   }
 }
+
+
+/* ============================================================================
+   V5.3 BOOKING ACTION PRIORITY
+   ============================================================================ */
+.row-actions > button[data-v21-pay],
+.row-actions > button[data-v23-pay]{
+  font-weight:800;
+}
+.action-more-menu button[data-v39-coupon]{
+  width:100%;
+}
