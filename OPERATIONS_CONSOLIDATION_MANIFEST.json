@@ -1,0 +1,159 @@
+{
+  "source_version": "V5.0",
+  "clean_version": "V5.1",
+  "consolidated_file": "operations.js",
+  "load_order_preserved": [
+    "operations-v2.js",
+    "operations-v21.js",
+    "operations-v23.js",
+    "operations-v25.js",
+    "operations-v27.js",
+    "operations-v28.js",
+    "operations-v29.js",
+    "operations-v30.js",
+    "operations-v31.js",
+    "operations-v32.js",
+    "operations-v35.js",
+    "operations-v36.js",
+    "operations-v37.js",
+    "operations-v38.js",
+    "operations-v39.js",
+    "operations-v40.js",
+    "operations-v41.js",
+    "operations-v42.js",
+    "operations-v43.js",
+    "operations-v44.js",
+    "operations-v45.js",
+    "operations-v46.js",
+    "operations-v48.js",
+    "operations-v49.js",
+    "operations-v50.js"
+  ],
+  "source_files": [
+    {
+      "file": "operations-v2.js",
+      "bytes": 30255,
+      "sha256": "5036a19912164fc9096a6d6798ea5c47c9033d1df7e653bcd3ab1b3ad269432e"
+    },
+    {
+      "file": "operations-v21.js",
+      "bytes": 39300,
+      "sha256": "9d0a96af30bd06634d57fb6323fdb1344814feaa031c27db77d367fc87fa365d"
+    },
+    {
+      "file": "operations-v23.js",
+      "bytes": 27064,
+      "sha256": "6ab01d76f7e8039279af57cdcd4b941997681795b9242507443a4ba076b663e0"
+    },
+    {
+      "file": "operations-v25.js",
+      "bytes": 18637,
+      "sha256": "aab935af4c115f0a4255a484d1772f191611eedab9e789848051ca15ba2a6424"
+    },
+    {
+      "file": "operations-v27.js",
+      "bytes": 10519,
+      "sha256": "ba612ed0629a0da1ce11ca402e47b1321c97934135a3d56ec8fc3e15183a5c22"
+    },
+    {
+      "file": "operations-v28.js",
+      "bytes": 12694,
+      "sha256": "087256ca7cb95bad6b705a672bbb53ce56f08bb3f2b27dada6e7e6da825e1021"
+    },
+    {
+      "file": "operations-v29.js",
+      "bytes": 21403,
+      "sha256": "9127bd9ac6aa8cd268b912ea6fa44d9ae43b71eabfd0e1802fe4fb078c19272c"
+    },
+    {
+      "file": "operations-v30.js",
+      "bytes": 6432,
+      "sha256": "6125b1633b46a313bbc20280c8ca533ab3eaae653e17805d36ae2f1ca8694683"
+    },
+    {
+      "file": "operations-v31.js",
+      "bytes": 11307,
+      "sha256": "884129e024edf165dbcda1d709ca36e31cfb0b429930bba61e434f627e8eb62e"
+    },
+    {
+      "file": "operations-v32.js",
+      "bytes": 16431,
+      "sha256": "60126655b89fc75d25d816a5f22f92fccffd39dc972a087751e9355b593aec3f"
+    },
+    {
+      "file": "operations-v35.js",
+      "bytes": 19216,
+      "sha256": "9be130a29d0559ccbe8c6fdc8ce0086d6a98342cb0db18cf0d8a034bb21c7cae"
+    },
+    {
+      "file": "operations-v36.js",
+      "bytes": 21408,
+      "sha256": "ecf59c3bc6cd6fced76a2541687470d4561e4435c0509cfa9e6d79102e36c4cd"
+    },
+    {
+      "file": "operations-v37.js",
+      "bytes": 30445,
+      "sha256": "8dbed23fa6df2cd6d5808bc53364130083bed940e5a9ee60bea07e8050900c9d"
+    },
+    {
+      "file": "operations-v38.js",
+      "bytes": 34393,
+      "sha256": "401f7c0acfef3538025664775e76d5d94cb598d2c64c648aa2feb85d2963c303"
+    },
+    {
+      "file": "operations-v39.js",
+      "bytes": 24011,
+      "sha256": "4b9f19f745449a147dc0a3e93f901628d9f8175faf338fbf9ebaff8f58cb5b6b"
+    },
+    {
+      "file": "operations-v40.js",
+      "bytes": 4217,
+      "sha256": "ab128897c25f90ec22f33bf464fe0c09077d4c125bafb249541b59e405ba1bb3"
+    },
+    {
+      "file": "operations-v41.js",
+      "bytes": 20657,
+      "sha256": "f05a1adbcafc662440c061e6e27eeb58a44c9e16ce9eb71edda23427bb7e6933"
+    },
+    {
+      "file": "operations-v42.js",
+      "bytes": 10261,
+      "sha256": "7ea2b14fcecb7cc09f3cc832d02483380654544127f449b174efaa0ea4813021"
+    },
+    {
+      "file": "operations-v43.js",
+      "bytes": 2995,
+      "sha256": "0f58ff5a9b9930bce7a3db2d1696e277216713fdc148e86bb07008aba02658ff"
+    },
+    {
+      "file": "operations-v44.js",
+      "bytes": 8782,
+      "sha256": "e889b4c3727d96e5e57e86295ee1cd56fa4a65993663da89cecb871303fe49ed"
+    },
+    {
+      "file": "operations-v45.js",
+      "bytes": 14719,
+      "sha256": "df9e18f405009b915a9832d090b51b4b036c16b550722f69b8460695c1de9179"
+    },
+    {
+      "file": "operations-v46.js",
+      "bytes": 9241,
+      "sha256": "70e71a04eadb1f645728a3c02c745b3ade4badc79182d982fe441f9434d59951"
+    },
+    {
+      "file": "operations-v48.js",
+      "bytes": 4785,
+      "sha256": "39be57a2fafe475456222e27d4e6648d5c01251533b8146d07f537cbc9920503"
+    },
+    {
+      "file": "operations-v49.js",
+      "bytes": 1991,
+      "sha256": "69e003ccb515e72af08d27ab74369269cba2dc35af20f5e28bed88deec534be7"
+    },
+    {
+      "file": "operations-v50.js",
+      "bytes": 1452,
+      "sha256": "fd309fa9a63dddbfd003f21a24ba9e9ed415e5acbbc87e25086836e9f3b5dd89"
+    }
+  ]
+}

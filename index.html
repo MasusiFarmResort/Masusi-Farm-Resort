@@ -68,7 +68,7 @@
       <nav id="mainNav" class="main-nav">
         <button data-view="dashboard" class="nav-link active"><span>⌂</span> Dashboard</button>
         <button data-view="live" class="nav-link"><span>◉</span> Live Rooms & Cottages</button>
-        <button data-view="cottage-bookings" class="nav-link"><span>▣</span> Cottage + Ligo</button>
+        <button data-view="cottage-bookings" class="nav-link"><span>▣</span> Cottage + Swimming</button>
         <button data-view="room-bookings" class="nav-link"><span>▤</span> Room Bookings</button>
         <button data-view="bookings" class="nav-link"><span>≡</span> All Bookings</button>
         <button data-view="availability" class="nav-link"><span>▦</span> Availability</button>
@@ -79,6 +79,7 @@
         <button data-view="pos" class="nav-link"><span>▦</span> Store / POS</button>
         <button data-view="services" class="nav-link"><span>＋</span> Services Library</button>
         <button data-view="rates" class="nav-link admin-only"><span>₱</span> Rates & Pricing</button>
+        <button data-view="coupons" class="nav-link"><span>%</span> Coupons & Vouchers</button>
         <button data-view="billing" class="nav-link"><span>₱</span> Billing</button>
         <button data-view="payments" class="nav-link"><span>✓</span> Payments</button>
         <button data-view="invoices" class="nav-link"><span>▧</span> Invoices</button>
@@ -106,6 +107,7 @@
           <p id="pageSubtitle">Today at Masusi Farm Resort</p>
         </div>
         <div class="topbar-actions">
+          <button id="pageReportBtn" class="btn btn-soft">Page Report</button>
           <button id="openSecondScreenBtn" class="btn btn-soft">Second Screen</button>
           <button id="refreshBtn" class="icon-btn" title="Refresh">↻</button>
           <button id="logoutBtn" class="btn btn-outline">Logout</button>
@@ -192,6 +194,7 @@
         <section id="view-pos" class="view"></section>
         <section id="view-services" class="view"></section>
         <section id="view-rates" class="view"></section>
+        <section id="view-coupons" class="view"></section>
         <section id="view-billing" class="view"></section>
         <section id="view-payments" class="view"></section>
         <section id="view-invoices" class="view"></section>
@@ -205,7 +208,12 @@
           <div class="section-head">
             <div><p class="eyebrow">MONTHLY MANAGEMENT REPORTS</p><h2>Reports</h2></div>
             <div class="filter-strip compact">
+              <select id="reportPeriodMode">
+                <option value="month">This / Selected Month</option>
+                <option value="year">Whole Year</option>
+              </select>
               <input id="reportsMonth" type="month">
+              <select id="reportsYear"></select>
               <select id="reportType">
                 <option value="bookings">Booking Report</option>
                 <option value="payments">Payment Report</option>
@@ -213,6 +221,20 @@
                 <option value="damages">Damage Report</option>
                 <option value="repairs">Repair Report</option>
                 <option value="occupancy">Occupancy Report</option>
+                <option value="pax_demographics">Pax Demographics & Area Report</option>
+                <option value="billing">Billing / Charges Report</option>
+                <option value="invoices">Invoice Report</option>
+                <option value="guests">Guest Report</option>
+                <option value="rooms">Rooms Activity Report</option>
+                <option value="cottages">Cottages Activity Report</option>
+                <option value="inventory">Inventory Movement Report</option>
+                <option value="pos">POS / Stock Movement Report</option>
+                <option value="services">Services Report</option>
+                <option value="rates">Rates & Pricing Report</option>
+                <option value="users">Users Report</option>
+                <option value="roles">Roles & Access Report</option>
+                <option value="audit">Audit Log Report</option>
+                <option value="barcode">Access / Barcode Report</option>
               </select>
               <button id="runReportBtn" class="btn btn-primary">Generate</button>
               <button id="printReportBtn" class="btn btn-soft">Print Report</button>
@@ -291,15 +313,6 @@
 
   <script src="config.js"></script>
   <script src="app.js"></script>
-  <script src="operations-v2.js"></script>
-  <script src="operations-v21.js"></script>
-  <script src="operations-v23.js"></script>
-  <script src="operations-v25.js"></script>
-  <script src="operations-v27.js"></script>
-  <script src="operations-v28.js"></script>
-  <script src="operations-v29.js"></script>
-  <script src="operations-v30.js"></script>
-  <script src="operations-v31.js"></script>
-  <script src="operations-v32.js"></script>
+  <script src="operations.js"></script>
 </body>
 </html>
