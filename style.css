@@ -3143,3 +3143,92 @@ pre{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ============================================================================
+   V5.7 MOBILE / TABLET SIDEBAR CLOSE FIX
+   Applies only at <=1024px. Desktop sidebar is not changed.
+   ============================================================================ */
+
+.v57-sidebar-overlay,
+.v57-sidebar-close{
+  display:none;
+}
+
+@media(max-width:1024px){
+  body.v57-sidebar-open{
+    overflow:hidden !important;
+    touch-action:none;
+  }
+
+  .v57-sidebar-overlay{
+    position:fixed;
+    inset:0;
+    z-index:1190;
+    display:block;
+    background:rgba(12,22,17,.48);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .2s ease,visibility .2s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .v57-sidebar-overlay.show{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+  }
+
+  #sidebar{
+    z-index:1200 !important;
+  }
+
+  #sidebar.open{
+    transform:translateX(0) !important;
+    visibility:visible !important;
+    pointer-events:auto !important;
+  }
+
+  .v57-sidebar-close{
+    position:sticky;
+    top:0;
+    z-index:5;
+    margin:0 0 8px auto;
+    width:42px;
+    height:42px;
+    min-width:42px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:50%;
+    background:rgba(255,255,255,.10);
+    color:#fff;
+    font-size:30px;
+    line-height:1;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .v57-sidebar-close:hover,
+  .v57-sidebar-close:focus-visible{
+    background:rgba(255,255,255,.18);
+    outline:2px solid rgba(255,255,255,.45);
+    outline-offset:2px;
+  }
+
+  #mobileMenuBtn{
+    touch-action:manipulation;
+  }
+}
+
+/* Explicitly avoid affecting normal desktop layout. */
+@media(min-width:1025px){
+  .v57-sidebar-overlay,
+  .v57-sidebar-close{
+    display:none !important;
+  }
+  body.v57-sidebar-open{
+    overflow:initial !important;
+  }
+}

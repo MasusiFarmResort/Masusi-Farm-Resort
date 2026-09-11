@@ -272,3 +272,11 @@ Adult, Kid, Baby, Senior, or PWD. Existing pax with a known category are
 preselected automatically. New or unclassified pax must be classified during
 assignment. The existing `classify_booking_pax_v41` RPC remains the source of
 truth so booking pax counts and billing/rate calculations stay synchronized.
+
+
+## V5.7 Mobile / Tablet Sidebar Close Fix
+The responsive sidebar was hardened for mobile phones, iPhone, tablets, and iPad.
+On screens up to 1024px it now has an explicit close (×) button, tap-outside
+backdrop, second-tap hamburger close, Escape-key close, and automatic close after
+selecting a navigation item. Desktop behavior above 1024px is intentionally
+unchanged.

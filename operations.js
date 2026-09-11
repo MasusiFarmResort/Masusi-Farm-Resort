@@ -7995,3 +7995,166 @@ v55OpenAssignPaxQr=async function(code){
   };
 };
 
+/* ============================================================================
+   MASUSI FARM RESORT V5.7
+   MOBILE / TABLET SIDEBAR CLOSE FIX
+   Desktop (>1024px) is intentionally untouched.
+   ============================================================================ */
+
+function v57IsCompactNav(){
+  return window.matchMedia('(max-width: 1024px)').matches;
+}
+
+function v57EnsureSidebarControls(){
+  if(!v57IsCompactNav())return;
+
+  const sidebar=$('#sidebar');
+  const menuBtn=$('#mobileMenuBtn');
+  if(!sidebar||!menuBtn)return;
+
+  /* Backdrop */
+  let overlay=$('#v57SidebarOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.id='v57SidebarOverlay';
+    overlay.className='v57-sidebar-overlay';
+    overlay.setAttribute('aria-hidden','true');
+    document.body.appendChild(overlay);
+  }
+
+  /* Explicit X close button inside mobile/tablet sidebar */
+  let closeBtn=$('#v57SidebarClose');
+  if(!closeBtn){
+    closeBtn=document.createElement('button');
+    closeBtn.id='v57SidebarClose';
+    closeBtn.type='button';
+    closeBtn.className='v57-sidebar-close';
+    closeBtn.setAttribute('aria-label','Close navigation menu');
+    closeBtn.innerHTML='&times;';
+    sidebar.insertBefore(closeBtn,sidebar.firstChild);
+  }
+
+  menuBtn.setAttribute('aria-controls','sidebar');
+  menuBtn.setAttribute('aria-expanded',sidebar.classList.contains('open')?'true':'false');
+}
+
+function v57OpenSidebar(){
+  if(!v57IsCompactNav())return;
+  v57EnsureSidebarControls();
+
+  const sidebar=$('#sidebar');
+  const overlay=$('#v57SidebarOverlay');
+  const menuBtn=$('#mobileMenuBtn');
+  if(!sidebar)return;
+
+  sidebar.classList.add('open');
+  document.body.classList.add('v57-sidebar-open');
+  overlay?.classList.add('show');
+  overlay?.setAttribute('aria-hidden','false');
+  menuBtn?.setAttribute('aria-expanded','true');
+
+  setTimeout(()=>$('#v57SidebarClose')?.focus(),30);
+}
+
+function v57CloseSidebar(returnFocus=false){
+  if(!v57IsCompactNav())return;
+
+  const sidebar=$('#sidebar');
+  const overlay=$('#v57SidebarOverlay');
+  const menuBtn=$('#mobileMenuBtn');
+
+  sidebar?.classList.remove('open');
+  document.body.classList.remove('v57-sidebar-open');
+  overlay?.classList.remove('show');
+  overlay?.setAttribute('aria-hidden','true');
+  menuBtn?.setAttribute('aria-expanded','false');
+
+  if(returnFocus)setTimeout(()=>menuBtn?.focus(),20);
+}
+
+function v57ToggleSidebar(){
+  if(!v57IsCompactNav())return;
+  const sidebar=$('#sidebar');
+  if(!sidebar)return;
+  sidebar.classList.contains('open') ? v57CloseSidebar(false) : v57OpenSidebar();
+}
+
+function v57BindSidebar(){
+  v57EnsureSidebarControls();
+
+  const menuBtn=$('#mobileMenuBtn');
+  if(menuBtn && menuBtn.dataset.v57Bound!=='1'){
+    menuBtn.dataset.v57Bound='1';
+
+    /* Replace the previous onclick toggle with the reliable V5.7 controller. */
+    menuBtn.onclick=e=>{
+      if(!v57IsCompactNav())return;
+      e.preventDefault();
+      e.stopPropagation();
+      v57ToggleSidebar();
+    };
+  }
+
+  const closeBtn=$('#v57SidebarClose');
+  if(closeBtn && closeBtn.dataset.v57Bound!=='1'){
+    closeBtn.dataset.v57Bound='1';
+    closeBtn.onclick=e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      v57CloseSidebar(true);
+    };
+  }
+
+  const overlay=$('#v57SidebarOverlay');
+  if(overlay && overlay.dataset.v57Bound!=='1'){
+    overlay.dataset.v57Bound='1';
+    overlay.onclick=()=>v57CloseSidebar(false);
+  }
+}
+
+/* Any sidebar navigation selection closes the drawer on compact devices. */
+document.addEventListener('click',e=>{
+  if(!v57IsCompactNav())return;
+
+  const nav=e.target.closest('#sidebar .nav-link, #sidebar [data-view-jump]');
+  if(nav){
+    setTimeout(()=>v57CloseSidebar(false),0);
+    return;
+  }
+
+  /* Logout may open confirmation modal, but drawer itself should close. */
+  if(e.target.closest('#sidebar #logoutBtn')){
+    setTimeout(()=>v57CloseSidebar(false),0);
+  }
+});
+
+/* Escape closes the menu. */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && v57IsCompactNav() && $('#sidebar')?.classList.contains('open')){
+    v57CloseSidebar(true);
+  }
+});
+
+/* Rebind after login/render and keep desktop behavior unchanged. */
+window.addEventListener('resize',()=>{
+  if(v57IsCompactNav()){
+    v57BindSidebar();
+  }else{
+    document.body.classList.remove('v57-sidebar-open');
+    $('#v57SidebarOverlay')?.classList.remove('show');
+    $('#v57SidebarOverlay')?.setAttribute('aria-hidden','true');
+    $('#mobileMenuBtn')?.setAttribute('aria-expanded','false');
+    /* Never apply compact overlay/lock state on PC. */
+  }
+});
+
+document.addEventListener('DOMContentLoaded',()=>setTimeout(v57BindSidebar,120));
+setTimeout(v57BindSidebar,300);
+
+const v57RenderCurrentBase=renderCurrent;
+renderCurrent=async function(){
+  const result=await v57RenderCurrentBase();
+  if(v57IsCompactNav())requestAnimationFrame(v57BindSidebar);
+  return result;
+};
+
