@@ -264,3 +264,11 @@ exists in the database, then assigned to an active booking, an existing pax with
 no code (or a newly created pax), and the appropriate cottage/room. Assignment
 does not automatically check the pax in; scanning the code again as Existing
 Pax continues the normal check-in/OUT/RETURN flow.
+
+
+## V5.6 Pax Category During QR Assignment
+The **Assign Pax QR** workflow now requires the pax category before saving:
+Adult, Kid, Baby, Senior, or PWD. Existing pax with a known category are
+preselected automatically. New or unclassified pax must be classified during
+assignment. The existing `classify_booking_pax_v41` RPC remains the source of
+truth so booking pax counts and billing/rate calculations stay synchronized.

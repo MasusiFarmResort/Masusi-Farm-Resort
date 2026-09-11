@@ -3112,3 +3112,34 @@ pre{
     grid-template-columns:1fr;
   }
 }
+
+
+/* ============================================================================
+   V5.6 PAX CATEGORY / RATE CLASSIFICATION
+   ============================================================================ */
+.v56-category-panel{
+  border:2px solid #d4c184;
+  background:linear-gradient(180deg,#fffdf7,#fff9e9);
+}
+.v56-category-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(220px,.8fr);
+  gap:12px;
+  align-items:end;
+  margin-top:10px;
+}
+.v56-rate-hint{
+  min-height:44px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:10px 12px;
+  border:1px solid #eadba9;
+  border-radius:10px;
+  background:#fff;
+}
+@media(max-width:700px){
+  .v56-category-grid{
+    grid-template-columns:1fr;
+  }
+}

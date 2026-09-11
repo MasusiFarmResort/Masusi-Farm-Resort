@@ -7620,3 +7620,378 @@ navigate=function(view){
   return r;
 };
 
+/* ============================================================================
+   MASUSI FARM RESORT V5.6
+   ASSIGN PAX QR — REQUIRED PAX CATEGORY / RATE CLASSIFICATION
+   Adult / Kid / Baby / Senior / PWD is selected during QR assignment.
+   The existing V4.1 classification RPC remains the source of truth.
+   ============================================================================ */
+
+function v56CategoryOptions(selected=''){
+  const s=String(selected||'').toLowerCase();
+  return `
+    <option value="">Select category...</option>
+    <option value="adult" ${s==='adult'?'selected':''}>Adult</option>
+    <option value="kid" ${s==='kid'?'selected':''}>Kid</option>
+    <option value="baby" ${s==='baby'?'selected':''}>Baby</option>
+    <option value="senior" ${s==='senior'?'selected':''}>Senior</option>
+    <option value="pwd" ${s==='pwd'?'selected':''}>PWD</option>`;
+}
+
+function v56ExistingPaxCategoryValue(p){
+  if(!p || p.category_confirmed===false || p.pax_type==='unclassified')return '';
+  if(p.is_senior)return 'senior';
+  if(p.is_pwd)return 'pwd';
+  if(p.pax_type==='kid')return 'kid';
+  if(p.pax_type==='baby')return 'baby';
+  return 'adult';
+}
+
+function v56RateHintHtml(category){
+  const labels={
+    adult:'Adult rate',
+    kid:'Kid rate',
+    baby:'Baby rate',
+    senior:'Senior rate / Senior discount rules',
+    pwd:'PWD rate / PWD discount rules'
+  };
+  if(!category)return '<span class="muted">Select category to determine the correct rate.</span>';
+  return `<strong>${esc(labels[category]||category)}</strong><br><small class="muted">Booking totals will recalculate automatically after classification.</small>`;
+}
+
+/* Override V5.5 QR assignment modal to include required category. */
+v55OpenAssignPaxQr=async function(code){
+  code=v24Norm(code);
+  if(!code)return toast('Scan or enter a QR / Barcode first.','error');
+
+  await refreshOperations();
+
+  const existing=v24FindPaxByCode(code);
+  if(existing){
+    const b=state.cache.bookings.find(x=>x.id===existing.booking_id);
+    openModal({
+      title:'QR Already Assigned',
+      eyebrow:'DUPLICATE CODE',
+      body:`<div class="panel">
+        <p><strong>${esc(code)}</strong></p>
+        <p>This QR / Barcode is already assigned to <strong>${esc(paxDisplayName(existing))}</strong>.</p>
+        <p class="muted">${esc(b?.booking_number||'')} · ${esc(b?.guest_name||'')}</p>
+        <p><strong>Category:</strong> ${esc(typeof v41PaxCategory==='function'?v41PaxCategory(existing):(existing.pax_type||'Not classified'))}</p>
+      </div>`,
+      footer:`<button class="btn btn-soft" data-modal-cancel>Close</button><button class="btn btn-primary" id="v56OpenExistingPax">Open Existing Pax</button>`
+    });
+    $('[data-modal-cancel]').onclick=closeModal;
+    $('#v56OpenExistingPax').onclick=()=>{closeModal();handlePaxScanV24(existing);};
+    return;
+  }
+
+  const bookingMatch=v24FindBookingByCode(code);
+  if(bookingMatch){
+    return toast('This code belongs to a Booking. Use Scan Booking mode.','error');
+  }
+
+  const bookings=v55ActiveBookings();
+  if(!bookings.length)return toast('No active booking is available for Pax assignment.','error');
+
+  openModal({
+    title:'Assign Printed QR to Pax',
+    eyebrow:code,
+    wide:true,
+    body:`<form id="v56AssignQrForm" class="modal-form">
+      <div class="panel full v55-scanned-code-card">
+        <span class="tiny muted">SCANNED QR / BARCODE</span>
+        <strong>${esc(code)}</strong>
+        <p class="muted tiny">This exact printed code will become the pax code.</p>
+      </div>
+
+      <label class="full">1. Assign to Booking
+        <select name="booking_id" id="v56AssignBooking" required>
+          <option value="">Select booking...</option>
+          ${bookings.map(b=>`<option value="${b.id}">${esc(b.booking_number)} · ${esc(b.guest_name||'Guest')} · ${esc(v55UnitNameForBooking(b))}</option>`).join('')}
+        </select>
+      </label>
+
+      <label class="full">2. Assign to Pax
+        <select name="pax_id" id="v56AssignPax" required disabled>
+          <option value="">Select booking first...</option>
+        </select>
+      </label>
+
+      <div id="v56NewPaxFields" class="panel full hidden">
+        <h3>New Pax / Companion</h3>
+        <div class="modal-form">
+          <label>Name / Nickname
+            <input name="new_pax_name" placeholder="Name or nickname">
+          </label>
+          <label>Gender
+            <select name="new_pax_gender">${v35GenderOptions('')}</select>
+          </label>
+          <label>Area
+            <select name="new_pax_area" id="v56NewPaxArea">${v35AreaOptions('')}</select>
+          </label>
+          <label id="v56NewPaxOtherWrap" class="hidden">Other Area / City / Province
+            <input name="new_pax_area_other" placeholder="Type location">
+          </label>
+        </div>
+      </div>
+
+      <div class="panel full v56-category-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">RATE CLASSIFICATION</p>
+            <h3>3. Pax Category</h3>
+            <p class="muted tiny">Required so the system can determine the correct rate and discount treatment.</p>
+          </div>
+        </div>
+
+        <div class="v56-category-grid">
+          <label>Category
+            <select name="category" id="v56AssignCategory" required>
+              ${v56CategoryOptions('')}
+            </select>
+          </label>
+          <div class="v56-rate-hint" id="v56RateHint">${v56RateHintHtml('')}</div>
+        </div>
+
+        <p class="tiny muted">
+          Senior and PWD are classified as adult pax with the appropriate Senior/PWD flag.
+          Booking pax counts and billing will update automatically.
+        </p>
+      </div>
+
+      <label class="full">4. Unit Assignment
+        <select name="unit_id" id="v56AssignUnit" required disabled>
+          <option value="">Select booking first...</option>
+        </select>
+      </label>
+
+      <div class="panel full">
+        <strong>Assignment only — no automatic check-in yet.</strong>
+        <p class="muted tiny">After saving, scan the QR again using <strong>Existing Pax</strong> mode for the normal entry/check-in flow.</p>
+      </div>
+    </form>`,
+    footer:`<button class="btn btn-soft" data-modal-cancel>Cancel</button><button class="btn btn-primary" id="v56SaveQrAssignment">Assign QR to Pax</button>`
+  });
+
+  $('[data-modal-cancel]').onclick=closeModal;
+
+  const bookingSelect=$('#v56AssignBooking');
+  const paxSelect=$('#v56AssignPax');
+  const unitSelect=$('#v56AssignUnit');
+  const categorySelect=$('#v56AssignCategory');
+  const rateHint=$('#v56RateHint');
+  const newFields=$('#v56NewPaxFields');
+  const newArea=$('#v56NewPaxArea');
+  const newOther=$('#v56NewPaxOtherWrap');
+
+  if(newArea)newArea.onchange=()=>newOther?.classList.toggle('hidden',newArea.value!=='Other');
+
+  categorySelect.onchange=()=>{
+    rateHint.innerHTML=v56RateHintHtml(categorySelect.value);
+  };
+
+  function populateAssignment(){
+    const b=state.cache.bookings.find(x=>x.id===bookingSelect.value);
+
+    categorySelect.value='';
+    rateHint.innerHTML=v56RateHintHtml('');
+
+    if(!b){
+      paxSelect.disabled=true;
+      unitSelect.disabled=true;
+      paxSelect.innerHTML='<option value="">Select booking first...</option>';
+      unitSelect.innerHTML='<option value="">Select booking first...</option>';
+      newFields.classList.add('hidden');
+      return;
+    }
+
+    const pax=(state.cache.pax||[]).filter(p=>
+      p.booking_id===b.id &&
+      p.access_status!=='cancelled'
+    );
+
+    const unassigned=pax.filter(p=>!v24Norm(p.code));
+    const currentlyAssigned=pax.filter(p=>v24Norm(p.code));
+
+    paxSelect.disabled=false;
+    paxSelect.innerHTML=`
+      <option value="">Select pax...</option>
+      ${unassigned.map(p=>`<option value="${p.id}">${esc(paxDisplayName(p))} · ${esc(typeof v41PaxCategory==='function'?v41PaxCategory(p):(p.pax_type||'Not classified'))} · NO CODE</option>`).join('')}
+      <option value="__new__">+ Create New Pax / Companion</option>
+      ${currentlyAssigned.length?`<optgroup label="Already has QR — unavailable">${currentlyAssigned.map(p=>`<option disabled>${esc(paxDisplayName(p))} · ${esc(p.code)}</option>`).join('')}</optgroup>`:''}
+    `;
+
+    const isRoom=b.booking_type==='room'||!!b.room_id;
+    unitSelect.disabled=false;
+
+    if(isRoom){
+      const room=(state.cache.rooms||[]).find(r=>r.id===b.room_id);
+      unitSelect.innerHTML=b.room_id
+        ? `<option value="${b.room_id}">${esc(room?.name||room?.unit_number||'Assigned Room')}</option>`
+        : '<option value="">Booking has no room assigned</option>';
+      if(b.room_id)unitSelect.value=b.room_id;
+    }else{
+      const cottages=(state.cache.cottages||[]).filter(c=>
+        c.is_active!==false &&
+        !['maintenance','damaged','inactive'].includes(String(c.status||'').toLowerCase())
+      );
+      unitSelect.innerHTML=`<option value="">Select cottage...</option>${cottages.map(c=>`<option value="${c.id}" ${c.id===b.cottage_id?'selected':''}>${esc(c.name||c.unit_number)} · Capacity ${c.capacity||'—'}</option>`).join('')}`;
+      if(b.cottage_id)unitSelect.value=b.cottage_id;
+    }
+  }
+
+  bookingSelect.onchange=populateAssignment;
+
+  paxSelect.onchange=()=>{
+    const isNew=paxSelect.value==='__new__';
+    newFields.classList.toggle('hidden',!isNew);
+
+    if(isNew){
+      categorySelect.value='';
+      rateHint.innerHTML=v56RateHintHtml('');
+      return;
+    }
+
+    const p=state.cache.pax.find(x=>x.id===paxSelect.value);
+    const existingCategory=v56ExistingPaxCategoryValue(p);
+    categorySelect.value=existingCategory;
+    rateHint.innerHTML=v56RateHintHtml(existingCategory);
+  };
+
+  $('#v56SaveQrAssignment').onclick=async()=>{
+    const d=Object.fromEntries(new FormData($('#v56AssignQrForm')).entries());
+    const b=state.cache.bookings.find(x=>x.id===d.booking_id);
+
+    if(!b)return toast('Select the booking.','error');
+    if(!d.pax_id)return toast('Select the pax to receive this QR.','error');
+    if(!d.category)return toast('Select Adult, Kid, Baby, Senior, or PWD.','error');
+    if(!d.unit_id)return toast('Select the room / cottage assignment.','error');
+
+    const {data:dupe,error:dupeError}=await sb
+      .from('booking_pax')
+      .select('id,display_name,booking_id')
+      .eq('code',code)
+      .maybeSingle();
+
+    if(dupeError)return toast(dupeError.message,'error');
+    if(dupe)return toast('This QR / Barcode was already assigned. Scan it as Existing Pax.','error');
+
+    let paxId=d.pax_id;
+
+    if(paxId==='__new__'){
+      if(d.new_pax_area==='Other'&&!String(d.new_pax_area_other||'').trim()){
+        return toast('Type the Other Area / City / Province.','error');
+      }
+
+      const {data,error}=await sb.rpc('add_unclassified_booking_pax_v41',{
+        p_booking_id:b.id,
+        p_display_name:String(d.new_pax_name||'').trim()||null,
+        p_gender:d.new_pax_gender||null,
+        p_area:d.new_pax_area||null,
+        p_area_other:String(d.new_pax_area_other||'').trim()||null,
+        p_code:code
+      });
+
+      if(error)return toast(error.message,'error');
+      const result=Array.isArray(data)?data[0]:data;
+      if(result?.ok===false)return toast(result.message||'Could not create pax.','error');
+
+      await refreshOperations();
+      const created=(state.cache.pax||[]).find(p=>
+        p.booking_id===b.id &&
+        v24Norm(p.code).toLowerCase()===code.toLowerCase()
+      );
+
+      if(!created)return toast('Pax was created but could not be reloaded. Refresh and try again.','error');
+      paxId=created.id;
+    }else{
+      const target=(state.cache.pax||[]).find(p=>p.id===paxId&&p.booking_id===b.id);
+      if(!target)return toast('Selected pax was not found.','error');
+      if(v24Norm(target.code))return toast('Selected pax already has a QR / Barcode.','error');
+
+      const patch={code};
+      if(b.booking_type==='room'||b.room_id){
+        patch.assigned_room_id=d.unit_id;
+        patch.assigned_cottage_id=null;
+      }else{
+        patch.assigned_cottage_id=d.unit_id;
+        patch.assigned_room_id=null;
+      }
+
+      const {error}=await sb.from('booking_pax').update(patch).eq('id',paxId);
+      if(error)return toast(error.message,'error');
+    }
+
+    if(d.pax_id==='__new__'){
+      const patch=(b.booking_type==='room'||b.room_id)
+        ? {assigned_room_id:d.unit_id,assigned_cottage_id:null}
+        : {assigned_cottage_id:d.unit_id,assigned_room_id:null};
+
+      const {error}=await sb.from('booking_pax').update(patch).eq('id',paxId);
+      if(error)return toast(error.message,'error');
+    }
+
+    /* Required classification = rate source of truth. */
+    const paxBeforeClassify=(state.cache.pax||[]).find(p=>p.id===paxId);
+    const classification=await sb.rpc('classify_booking_pax_v41',{
+      p_pax_id:paxId,
+      p_category:d.category,
+      p_gender:paxBeforeClassify?.gender||d.new_pax_gender||null,
+      p_area:paxBeforeClassify?.area||d.new_pax_area||null,
+      p_area_other:paxBeforeClassify?.area_other||String(d.new_pax_area_other||'').trim()||null
+    });
+
+    if(classification.error)return toast(classification.error.message,'error');
+
+    const classResult=Array.isArray(classification.data)?classification.data[0]:classification.data;
+    if(classResult?.ok===false)return toast(classResult.message||'Could not classify pax.','error');
+
+    await refreshOperations();
+
+    const assigned=state.cache.pax.find(p=>p.id===paxId);
+    const categoryLabel=typeof v41PaxCategory==='function'
+      ? v41PaxCategory(assigned)
+      : d.category;
+
+    const unitName=(b.booking_type==='room'||b.room_id)
+      ? ((state.cache.rooms||[]).find(r=>r.id===d.unit_id)?.name||(state.cache.rooms||[]).find(r=>r.id===d.unit_id)?.unit_number||'Room')
+      : ((state.cache.cottages||[]).find(c=>c.id===d.unit_id)?.name||(state.cache.cottages||[]).find(c=>c.id===d.unit_id)?.unit_number||'Cottage');
+
+    const freshBooking=state.cache.bookings.find(x=>x.id===b.id)||b;
+    const totals=typeof bookingAccountTotals==='function'?bookingAccountTotals(freshBooking):null;
+
+    closeModal();
+
+    $('#barcodeResult').innerHTML=`<div class="v55-assignment-success">
+      <div class="v55-success-icon">✓</div>
+      <h3>QR Assigned Successfully</h3>
+      <div class="report-kpis">
+        <div class="report-kpi"><span>Pax</span><strong>${esc(paxDisplayName(assigned))}</strong></div>
+        <div class="report-kpi"><span>Category</span><strong>${esc(categoryLabel)}</strong></div>
+        <div class="report-kpi"><span>Booking</span><strong>${esc(b.booking_number)}</strong></div>
+        <div class="report-kpi"><span>${b.room_id?'Room':'Cottage'}</span><strong>${esc(unitName)}</strong></div>
+        <div class="report-kpi"><span>QR / Barcode</span><strong>${esc(code)}</strong></div>
+        ${totals?`<div class="report-kpi"><span>Updated Balance</span><strong>${money(totals.balance)}</strong></div>`:''}
+      </div>
+      <p class="muted">Pax category and rate classification are now saved. Booking pax counts and billing have been refreshed.</p>
+      <div class="row-actions v55-success-actions">
+        <button class="btn btn-primary" id="v56ScanAssignedPaxNow">Scan as Existing Pax</button>
+        <button class="btn btn-soft" id="v56AssignAnotherQr">Assign Another QR</button>
+      </div>
+    </div>`;
+
+    $('#v56ScanAssignedPaxNow').onclick=()=>{
+      v55SetScanMode('pax');
+      $('#barcodeInput').value=code;
+      scanBarcode();
+    };
+
+    $('#v56AssignAnotherQr').onclick=()=>{
+      v55SetScanMode('assign');
+      $('#barcodeInput').focus();
+    };
+
+    toast(`${code} assigned to ${paxDisplayName(assigned)} as ${categoryLabel}.`);
+  };
+};
+
