@@ -2931,3 +2931,184 @@ pre{
 .action-more-menu button[data-v39-coupon]{
   width:100%;
 }
+
+
+/* ============================================================================
+   V5.4 ADD PAX — PROVIDED CODE FIRST
+   ============================================================================ */
+.v54-code-panel{
+  border:2px solid #b8d6c4;
+  background:linear-gradient(180deg,#fbfefc,#f1f8f4);
+}
+.v54-code-panel .panel-head{
+  align-items:flex-start;
+}
+.v54-code-input-label{
+  margin-top:12px;
+}
+.v54-code-input-label .barcode-input{
+  min-height:50px;
+  font-size:17px;
+  font-weight:750;
+  letter-spacing:.03em;
+  background:#fff;
+}
+.v54-code-actions{
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto;
+  gap:8px;
+  margin-top:10px;
+}
+.v54-code-actions .btn{
+  min-height:44px;
+}
+.v54-code-source{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  white-space:nowrap;
+}
+.v54-code-source.provided{
+  background:#dcefe3;
+  color:#155c3b;
+}
+.v54-code-source.auto{
+  background:#fff0c9;
+  color:#775400;
+}
+.v54-camera-panel{
+  margin-top:12px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+}
+#v54AddPaxReader{
+  width:100%;
+  max-width:720px;
+  margin:10px auto 0;
+  overflow:hidden;
+  border-radius:12px;
+}
+
+@media(max-width:1024px){
+  .v54-code-actions{
+    grid-template-columns:1fr 1fr;
+  }
+  .v54-code-actions #v54ScanProvidedBtn{
+    grid-column:1/-1;
+  }
+}
+@media(max-width:700px){
+  .v54-code-panel .panel-head{
+    flex-direction:column;
+  }
+  .v54-code-source{
+    white-space:normal;
+  }
+  .v54-code-actions{
+    grid-template-columns:1fr;
+  }
+  .v54-code-actions #v54ScanProvidedBtn{
+    grid-column:auto;
+  }
+  .v54-code-actions .btn{
+    width:100%;
+    min-height:46px;
+  }
+}
+
+
+/* ============================================================================
+   V5.5 MULTI-MODE BARCODE / QR
+   ============================================================================ */
+.v55-scan-modes{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+  margin:14px 0;
+}
+.v55-scan-mode{
+  min-width:0;
+  min-height:60px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:3px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+}
+.v55-scan-mode strong{
+  font-size:12px;
+}
+.v55-scan-mode small{
+  color:var(--muted);
+  font-size:10px;
+}
+.v55-scan-mode.active{
+  border-color:#2f7d55;
+  background:#eaf5ee;
+  box-shadow:0 0 0 2px rgba(47,125,85,.10);
+}
+.v55-scan-mode.active strong{
+  color:#155b3a;
+}
+
+.v55-scanned-code-card{
+  border:2px solid #b8d6c4;
+  background:#f3faf6;
+}
+.v55-scanned-code-card > strong{
+  display:block;
+  margin:5px 0;
+  font-size:20px;
+  overflow-wrap:anywhere;
+}
+
+.v55-assignment-success{
+  padding:16px;
+  text-align:center;
+}
+.v55-success-icon{
+  width:54px;
+  height:54px;
+  margin:0 auto 10px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#dff2e6;
+  color:#17603d;
+  font-size:28px;
+  font-weight:900;
+}
+.v55-success-actions{
+  margin-top:14px;
+  justify-content:center;
+}
+
+@media(max-width:700px){
+  .v55-scan-modes{
+    grid-template-columns:1fr 1fr;
+  }
+  .v55-scan-mode{
+    min-height:68px;
+    padding:10px;
+  }
+}
+@media(max-width:390px){
+  .v55-scan-modes{
+    grid-template-columns:1fr;
+  }
+}

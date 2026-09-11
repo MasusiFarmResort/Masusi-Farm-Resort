@@ -6843,3 +6843,780 @@ v53ActionObserver.observe(document.body,{childList:true,subtree:true});
 document.addEventListener('DOMContentLoaded',()=>setTimeout(v53PrioritizePaymentActions,150));
 setTimeout(v53PrioritizePaymentActions,300);
 
+/* ============================================================================
+   MASUSI FARM RESORT V5.4
+   ADD PAX — PROVIDED QR/BARCODE FIRST
+   Manual/provided code is the default and priority flow.
+   Auto-generated code remains available as a secondary option.
+   ============================================================================ */
+
+let v54AddPaxScanner=null;
+let v54AddPaxScannerRunning=false;
+
+async function v54StopAddPaxScanner(){
+  try{
+    if(v54AddPaxScanner && v54AddPaxScannerRunning){
+      await v54AddPaxScanner.stop();
+      await v54AddPaxScanner.clear();
+    }
+  }catch(e){}
+  v54AddPaxScanner=null;
+  v54AddPaxScannerRunning=false;
+}
+
+async function v54StartAddPaxCamera(){
+  const reader=$('#v54AddPaxReader');
+  const panel=$('#v54AddPaxCameraPanel');
+  const codeInput=$('#v54PaxCode');
+
+  if(!reader||!panel||!codeInput)return;
+
+  if(typeof Html5Qrcode==='undefined'){
+    return toast('Camera scanner library did not load. You can type or use a USB/Bluetooth scanner instead.','error');
+  }
+
+  panel.classList.remove('hidden');
+  $('#v54ScanProvidedBtn').disabled=true;
+
+  try{
+    v54AddPaxScanner=new Html5Qrcode('v54AddPaxReader');
+    const cameras=await Html5Qrcode.getCameras();
+    if(!cameras?.length)throw new Error('No camera detected.');
+
+    const preferred=
+      cameras.find(c=>/back|rear|environment/i.test(c.label)) ||
+      cameras[cameras.length-1];
+
+    v54AddPaxScannerRunning=true;
+
+    await v54AddPaxScanner.start(
+      preferred.id,
+      {fps:10,qrbox:{width:260,height:180},aspectRatio:1.333333},
+      async decodedText=>{
+        const code=v24Norm(decodedText);
+        if(!code)return;
+
+        codeInput.value=code;
+        codeInput.dataset.source='provided';
+        $('#v54CodeSource').textContent='Provided QR / Barcode scanned';
+        $('#v54CodeSource').className='v54-code-source provided';
+
+        await v54StopAddPaxScanner();
+        panel.classList.add('hidden');
+        $('#v54ScanProvidedBtn').disabled=false;
+
+        toast(`Provided code scanned: ${code}`);
+        codeInput.focus();
+      },
+      ()=>{}
+    );
+  }catch(err){
+    console.error(err);
+    await v54StopAddPaxScanner();
+    panel.classList.add('hidden');
+    $('#v54ScanProvidedBtn').disabled=false;
+    toast(err?.message||'Unable to open camera.','error');
+  }
+}
+
+function v54SetAutoPaxCode(){
+  const input=$('#v54PaxCode');
+  if(!input)return;
+  input.value=v24RandomPaxCode();
+  input.dataset.source='auto';
+  $('#v54CodeSource').textContent='System-generated code';
+  $('#v54CodeSource').className='v54-code-source auto';
+  input.focus();
+}
+
+function v54ClearPaxCode(){
+  const input=$('#v54PaxCode');
+  if(!input)return;
+  input.value='';
+  input.dataset.source='provided';
+  $('#v54CodeSource').textContent='Waiting for provided QR / Barcode';
+  $('#v54CodeSource').className='v54-code-source provided';
+  input.focus();
+}
+
+/* Latest Add Pax flow */
+openAddPaxV24=function(booking){
+  openModal({
+    title:'Add Pax / Companion',
+    eyebrow:booking.booking_number,
+    wide:true,
+    body:`<form id="v54AddPaxForm" class="modal-form">
+      <label>Name / Nickname
+        <input name="display_name" placeholder="Name does not need to be complete">
+      </label>
+
+      <label>Gender
+        <select name="gender">${v35GenderOptions('')}</select>
+      </label>
+
+      <label>Area
+        <select name="area" id="v35PaxArea">${v35AreaOptions('')}</select>
+      </label>
+
+      <label id="v35OtherAreaWrap" class="hidden">
+        Other Area / City / Province
+        <input name="area_other" placeholder="Type location">
+      </label>
+
+      <div class="panel full v54-code-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">PAX QR / BARCODE</p>
+            <h3>Use Provided Code</h3>
+            <p class="muted tiny">Priority: scan or enter the physical QR/barcode that you will give to this pax.</p>
+          </div>
+          <span id="v54CodeSource" class="v54-code-source provided">Waiting for provided QR / Barcode</span>
+        </div>
+
+        <label class="full v54-code-input-label">
+          Barcode / QR / Code
+          <input
+            name="code"
+            id="v54PaxCode"
+            class="barcode-input"
+            autocomplete="off"
+            placeholder="Scan with handheld scanner or type the provided code"
+            required
+            autofocus>
+        </label>
+
+        <div class="v54-code-actions full">
+          <button type="button" class="btn btn-primary" id="v54ScanProvidedBtn">Scan Provided QR / Barcode</button>
+          <button type="button" class="btn btn-soft" id="v54AutoCodeBtn">Auto Generate Code</button>
+          <button type="button" class="btn btn-soft" id="v54ClearCodeBtn">Clear</button>
+        </div>
+
+        <div id="v54AddPaxCameraPanel" class="full v54-camera-panel hidden">
+          <div class="panel-head">
+            <div>
+              <h3>Camera Scanner</h3>
+              <p class="muted tiny">Point the phone/tablet camera at the provided QR or barcode.</p>
+            </div>
+            <button type="button" class="btn btn-soft" id="v54StopPaxCameraBtn">Close Camera</button>
+          </div>
+          <div id="v54AddPaxReader"></div>
+        </div>
+
+        <p class="tiny muted full">
+          USB/Bluetooth barcode scanner: click the code field, then scan.
+          Phone/tablet: use <strong>Scan Provided QR / Barcode</strong>.
+          Use <strong>Auto Generate Code</strong> only when no pre-printed code is available.
+        </p>
+      </div>
+
+      <div class="panel full">
+        <strong>Category is selected later.</strong>
+        <p class="muted tiny">Adult / Kid / Baby / Senior / PWD will be selected when the pax is scanned for entry, or from Edit Pax in Pax Manager.</p>
+      </div>
+    </form>`,
+    footer:`<button class="btn btn-soft" data-modal-cancel>Cancel</button><button class="btn btn-primary" id="v54AddPaxSave">Add Pax</button>`
+  });
+
+  v35WireAreaOther();
+
+  const codeInput=$('#v54PaxCode');
+  codeInput.dataset.source='provided';
+
+  /* Handheld scanners commonly send Enter. Keep the scanned value,
+     but do not accidentally submit before the user reviews the pax details. */
+  codeInput.onkeydown=e=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      const code=v24Norm(codeInput.value);
+      if(code){
+        codeInput.value=code;
+        codeInput.dataset.source='provided';
+        $('#v54CodeSource').textContent='Provided QR / Barcode entered';
+        $('#v54CodeSource').className='v54-code-source provided';
+        toast(`Code captured: ${code}`);
+      }
+    }
+  };
+
+  codeInput.oninput=()=>{
+    if(codeInput.dataset.source!=='auto'){
+      codeInput.dataset.source='provided';
+      $('#v54CodeSource').textContent=codeInput.value.trim()
+        ? 'Provided QR / Barcode entered'
+        : 'Waiting for provided QR / Barcode';
+      $('#v54CodeSource').className='v54-code-source provided';
+    }
+  };
+
+  $('#v54ScanProvidedBtn').onclick=v54StartAddPaxCamera;
+  $('#v54AutoCodeBtn').onclick=v54SetAutoPaxCode;
+  $('#v54ClearCodeBtn').onclick=v54ClearPaxCode;
+
+  $('#v54StopPaxCameraBtn').onclick=async()=>{
+    await v54StopAddPaxScanner();
+    $('#v54AddPaxCameraPanel').classList.add('hidden');
+    $('#v54ScanProvidedBtn').disabled=false;
+  };
+
+  $('[data-modal-cancel]').onclick=async()=>{
+    await v54StopAddPaxScanner();
+    openPaxManagerV24(booking);
+  };
+
+  if($('#modalCloseBtn')){
+    $('#modalCloseBtn').onclick=async()=>{
+      await v54StopAddPaxScanner();
+      closeModal();
+    };
+  }
+
+  $('#v54AddPaxSave').onclick=async()=>{
+    const d=Object.fromEntries(new FormData($('#v54AddPaxForm')).entries());
+
+    if(d.area==='Other'&&!String(d.area_other||'').trim()){
+      return toast('Type the Other Area / City / Province.','error');
+    }
+
+    const code=v24Norm(d.code);
+    if(!code){
+      return toast('Scan or enter the provided Pax QR/Barcode, or use Auto Generate Code.','error');
+    }
+
+    /* Fast duplicate feedback before the RPC. */
+    const {data:dupe,error:dupeError}=await sb
+      .from('booking_pax')
+      .select('id,display_name')
+      .eq('code',code)
+      .maybeSingle();
+
+    if(dupeError)return toast(dupeError.message,'error');
+    if(dupe)return toast('That QR / Barcode code is already assigned to another pax.','error');
+
+    await v54StopAddPaxScanner();
+
+    const {data,error}=await sb.rpc('add_unclassified_booking_pax_v41',{
+      p_booking_id:booking.id,
+      p_display_name:String(d.display_name||'').trim()||null,
+      p_gender:d.gender||null,
+      p_area:d.area||null,
+      p_area_other:String(d.area_other||'').trim()||null,
+      p_code:code
+    });
+
+    if(error)return toast(error.message,'error');
+
+    const result=Array.isArray(data)?data[0]:data;
+    if(result?.ok===false)return toast(result.message||'Could not add pax.','error');
+
+    await refreshOperations();
+
+    const source=codeInput.dataset.source==='auto'?'system-generated':'provided';
+    toast(`Pax added with ${source} code: ${code}`);
+
+    openPaxManagerV24(
+      state.cache.bookings.find(x=>x.id===booking.id)||booking
+    );
+  };
+
+  setTimeout(()=>codeInput?.focus(),120);
+};
+
+/* ============================================================================
+   MASUSI FARM RESORT V5.5
+   MULTI-MODE BARCODE / QR WORKFLOW
+   Scan modes:
+   1) Existing Pax
+   2) Booking
+   3) Assign Pax QR
+   4) Auto Detect
+   ============================================================================ */
+
+state.v55ScanMode=state.v55ScanMode||'pax';
+
+function v55ActiveBookings(){
+  return (state.cache.bookings||[]).filter(b=>
+    !['cancelled','checked_out','no_show'].includes(String(b.status||'').toLowerCase())
+  );
+}
+
+function v55UnitNameForBooking(b){
+  if(!b)return '—';
+  if(b.room_id){
+    const r=(state.cache.rooms||[]).find(x=>x.id===b.room_id);
+    return r?.name||r?.unit_number||'Room';
+  }
+  if(b.cottage_id){
+    const c=(state.cache.cottages||[]).find(x=>x.id===b.cottage_id);
+    return c?.name||c?.unit_number||'Cottage';
+  }
+  return 'Not assigned';
+}
+
+function v55SetScanMode(mode){
+  state.v55ScanMode=mode;
+  document.querySelectorAll('[data-v55-scan-mode]').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.v55ScanMode===mode);
+  });
+
+  const title=$('#v55ScanModeTitle');
+  const help=$('#v55ScanModeHelp');
+  const search=$('#barcodeSearchBtn');
+  const input=$('#barcodeInput');
+
+  const data={
+    pax:{
+      title:'Scan Existing Pax',
+      help:'Use this when the QR/barcode is already assigned to a pax. The system will open that pax for check-in, OUT, RETURN, account, or purchase.',
+      button:'Scan Existing Pax',
+      placeholder:'Scan assigned Pax QR / Barcode'
+    },
+    booking:{
+      title:'Scan Booking',
+      help:'Use this for a Booking QR, Booking Barcode, Booking Scan Code, or Booking Number.',
+      button:'Scan Booking',
+      placeholder:'Scan Booking QR / Barcode'
+    },
+    assign:{
+      title:'Assign Printed QR to Pax',
+      help:'Use this for a new pre-printed QR/barcode. After scanning, choose the booking, choose the pax, and choose the room/cottage assignment.',
+      button:'Scan & Assign QR',
+      placeholder:'Scan NEW provided Pax QR / Barcode'
+    },
+    auto:{
+      title:'Auto Detect',
+      help:'The system will first look for an existing Pax code, then a Booking code. If the code is unknown, you can assign it as a new Pax QR.',
+      button:'Detect Code',
+      placeholder:'Scan Pax or Booking QR / Barcode'
+    }
+  }[mode]||{};
+
+  if(title)title.textContent=data.title||'Barcode Scanner';
+  if(help)help.textContent=data.help||'';
+  if(search)search.textContent=data.button||'Scan';
+  if(input){
+    input.placeholder=data.placeholder||'Scan or enter code';
+    input.value='';
+    setTimeout(()=>input.focus(),30);
+  }
+  if($('#barcodeResult')){
+    $('#barcodeResult').innerHTML=`<div class="empty-state"><strong>${esc(data.title||'Ready to scan')}</strong><p>${esc(data.help||'')}</p></div>`;
+  }
+}
+
+function v55SetupScannerModes(){
+  const panel=$('#view-barcode .scanner-panel');
+  if(!panel||panel.querySelector('#v55ScanModes'))return;
+
+  const h3=panel.querySelector('h3');
+  const p=h3?.nextElementSibling;
+
+  if(h3){
+    h3.id='v55ScanModeTitle';
+    h3.textContent='Scan Existing Pax';
+  }
+  if(p){
+    p.id='v55ScanModeHelp';
+    p.textContent='Use this when the QR/barcode is already assigned to a pax.';
+  }
+
+  const modes=document.createElement('div');
+  modes.id='v55ScanModes';
+  modes.className='v55-scan-modes';
+  modes.innerHTML=`
+    <button type="button" class="v55-scan-mode active" data-v55-scan-mode="pax">
+      <strong>Existing Pax</strong><small>Assigned QR</small>
+    </button>
+    <button type="button" class="v55-scan-mode" data-v55-scan-mode="booking">
+      <strong>Booking</strong><small>Booking QR</small>
+    </button>
+    <button type="button" class="v55-scan-mode" data-v55-scan-mode="assign">
+      <strong>Assign Pax QR</strong><small>New printed QR</small>
+    </button>
+    <button type="button" class="v55-scan-mode" data-v55-scan-mode="auto">
+      <strong>Auto Detect</strong><small>Pax or Booking</small>
+    </button>`;
+
+  const input=$('#barcodeInput');
+  panel.insertBefore(modes,input);
+
+  modes.querySelectorAll('[data-v55-scan-mode]').forEach(btn=>{
+    btn.onclick=()=>v55SetScanMode(btn.dataset.v55ScanMode);
+  });
+
+  v55SetScanMode(state.v55ScanMode||'pax');
+}
+
+function v55UnknownCodeResult(code,canAssign=true){
+  $('#barcodeResult').innerHTML=`<div class="empty-state">
+    <strong>Code not found</strong>
+    <p>${esc(code)}</p>
+    <small>This code is not currently assigned to a pax or booking.</small>
+    ${canAssign?`<div style="margin-top:12px"><button class="btn btn-primary" id="v55AssignUnknownCode">Assign This QR to Pax</button></div>`:''}
+  </div>`;
+  if($('#v55AssignUnknownCode'))$('#v55AssignUnknownCode').onclick=()=>v55OpenAssignPaxQr(code);
+}
+
+/* ---------- ASSIGN A PRE-PRINTED CODE ---------- */
+
+async function v55OpenAssignPaxQr(code){
+  code=v24Norm(code);
+  if(!code)return toast('Scan or enter a QR / Barcode first.','error');
+
+  await refreshOperations();
+
+  const existing=v24FindPaxByCode(code);
+  if(existing){
+    const b=state.cache.bookings.find(x=>x.id===existing.booking_id);
+    openModal({
+      title:'QR Already Assigned',
+      eyebrow:'DUPLICATE CODE',
+      body:`<div class="panel">
+        <p><strong>${esc(code)}</strong></p>
+        <p>This QR / Barcode is already assigned to <strong>${esc(paxDisplayName(existing))}</strong>.</p>
+        <p class="muted">${esc(b?.booking_number||'')} · ${esc(b?.guest_name||'')}</p>
+      </div>`,
+      footer:`<button class="btn btn-soft" data-modal-cancel>Close</button><button class="btn btn-primary" id="v55OpenExistingPax">Open Existing Pax</button>`
+    });
+    $('[data-modal-cancel]').onclick=closeModal;
+    $('#v55OpenExistingPax').onclick=()=>{closeModal();handlePaxScanV24(existing);};
+    return;
+  }
+
+  const bookingMatch=v24FindBookingByCode(code);
+  if(bookingMatch){
+    return toast('This code belongs to a Booking. Use Scan Booking mode.','error');
+  }
+
+  const bookings=v55ActiveBookings();
+  if(!bookings.length)return toast('No active booking is available for Pax assignment.','error');
+
+  openModal({
+    title:'Assign Printed QR to Pax',
+    eyebrow:code,
+    wide:true,
+    body:`<form id="v55AssignQrForm" class="modal-form">
+      <div class="panel full v55-scanned-code-card">
+        <span class="tiny muted">SCANNED QR / BARCODE</span>
+        <strong>${esc(code)}</strong>
+        <p class="muted tiny">This exact printed code will become the pax code.</p>
+      </div>
+
+      <label class="full">1. Assign to Booking
+        <select name="booking_id" id="v55AssignBooking" required>
+          <option value="">Select booking...</option>
+          ${bookings.map(b=>`<option value="${b.id}">${esc(b.booking_number)} · ${esc(b.guest_name||'Guest')} · ${esc(v55UnitNameForBooking(b))}</option>`).join('')}
+        </select>
+      </label>
+
+      <label class="full">2. Assign to Pax
+        <select name="pax_id" id="v55AssignPax" required disabled>
+          <option value="">Select booking first...</option>
+        </select>
+      </label>
+
+      <div id="v55NewPaxFields" class="panel full hidden">
+        <h3>New Pax / Companion</h3>
+        <div class="modal-form">
+          <label>Name / Nickname
+            <input name="new_pax_name" placeholder="Name or nickname">
+          </label>
+          <label>Gender
+            <select name="new_pax_gender">${v35GenderOptions('')}</select>
+          </label>
+          <label>Area
+            <select name="new_pax_area" id="v55NewPaxArea">${v35AreaOptions('')}</select>
+          </label>
+          <label id="v55NewPaxOtherWrap" class="hidden">Other Area / City / Province
+            <input name="new_pax_area_other" placeholder="Type location">
+          </label>
+        </div>
+        <p class="tiny muted">Category remains unclassified until first entry scan or Edit Pax.</p>
+      </div>
+
+      <label class="full">3. Unit Assignment
+        <select name="unit_id" id="v55AssignUnit" required disabled>
+          <option value="">Select booking first...</option>
+        </select>
+      </label>
+
+      <div class="panel full">
+        <strong>Assignment only — no automatic check-in yet.</strong>
+        <p class="muted tiny">After this QR is assigned, scan it again using <strong>Existing Pax</strong> mode to continue normal check-in / OUT / RETURN flow.</p>
+      </div>
+    </form>`,
+    footer:`<button class="btn btn-soft" data-modal-cancel>Cancel</button><button class="btn btn-primary" id="v55SaveQrAssignment">Assign QR to Pax</button>`
+  });
+
+  $('[data-modal-cancel]').onclick=closeModal;
+
+  const bookingSelect=$('#v55AssignBooking');
+  const paxSelect=$('#v55AssignPax');
+  const unitSelect=$('#v55AssignUnit');
+  const newFields=$('#v55NewPaxFields');
+  const newArea=$('#v55NewPaxArea');
+  const newOther=$('#v55NewPaxOtherWrap');
+
+  if(newArea)newArea.onchange=()=>newOther?.classList.toggle('hidden',newArea.value!=='Other');
+
+  function populateAssignment(){
+    const b=state.cache.bookings.find(x=>x.id===bookingSelect.value);
+
+    if(!b){
+      paxSelect.disabled=true;
+      unitSelect.disabled=true;
+      paxSelect.innerHTML='<option value="">Select booking first...</option>';
+      unitSelect.innerHTML='<option value="">Select booking first...</option>';
+      newFields.classList.add('hidden');
+      return;
+    }
+
+    const pax=(state.cache.pax||[]).filter(p=>
+      p.booking_id===b.id &&
+      p.access_status!=='cancelled'
+    );
+
+    const unassigned=pax.filter(p=>!v24Norm(p.code));
+    const currentlyAssigned=pax.filter(p=>v24Norm(p.code));
+
+    paxSelect.disabled=false;
+    paxSelect.innerHTML=`
+      <option value="">Select pax...</option>
+      ${unassigned.map(p=>`<option value="${p.id}">${esc(paxDisplayName(p))} · NO CODE</option>`).join('')}
+      <option value="__new__">+ Create New Pax / Companion</option>
+      ${currentlyAssigned.length?`<optgroup label="Already has QR — unavailable">${currentlyAssigned.map(p=>`<option disabled>${esc(paxDisplayName(p))} · ${esc(p.code)}</option>`).join('')}</optgroup>`:''}
+    `;
+
+    const isRoom=b.booking_type==='room'||!!b.room_id;
+    unitSelect.disabled=false;
+
+    if(isRoom){
+      const room=(state.cache.rooms||[]).find(r=>r.id===b.room_id);
+      unitSelect.innerHTML=b.room_id
+        ? `<option value="${b.room_id}">${esc(room?.name||room?.unit_number||'Assigned Room')}</option>`
+        : '<option value="">Booking has no room assigned</option>';
+      if(b.room_id)unitSelect.value=b.room_id;
+    }else{
+      const cottages=(state.cache.cottages||[]).filter(c=>
+        c.is_active!==false &&
+        !['maintenance','damaged','inactive'].includes(String(c.status||'').toLowerCase())
+      );
+      unitSelect.innerHTML=`<option value="">Select cottage...</option>${cottages.map(c=>`<option value="${c.id}" ${c.id===b.cottage_id?'selected':''}>${esc(c.name||c.unit_number)} · Capacity ${c.capacity||'—'}</option>`).join('')}`;
+      if(b.cottage_id)unitSelect.value=b.cottage_id;
+    }
+  }
+
+  bookingSelect.onchange=populateAssignment;
+  paxSelect.onchange=()=>{
+    newFields.classList.toggle('hidden',paxSelect.value!=='__new__');
+  };
+
+  $('#v55SaveQrAssignment').onclick=async()=>{
+    const d=Object.fromEntries(new FormData($('#v55AssignQrForm')).entries());
+    const b=state.cache.bookings.find(x=>x.id===d.booking_id);
+    if(!b)return toast('Select the booking.','error');
+    if(!d.pax_id)return toast('Select the pax to receive this QR.','error');
+    if(!d.unit_id)return toast('Select the room / cottage assignment.','error');
+
+    /* Re-check just before save in case another staff user assigned it. */
+    const {data:dupe,error:dupeError}=await sb
+      .from('booking_pax')
+      .select('id,display_name,booking_id')
+      .eq('code',code)
+      .maybeSingle();
+    if(dupeError)return toast(dupeError.message,'error');
+    if(dupe)return toast('This QR / Barcode was already assigned by another action. Scan it as Existing Pax.','error');
+
+    let paxId=d.pax_id;
+
+    if(paxId==='__new__'){
+      if(d.new_pax_area==='Other'&&!String(d.new_pax_area_other||'').trim()){
+        return toast('Type the Other Area / City / Province.','error');
+      }
+
+      const {data,error}=await sb.rpc('add_unclassified_booking_pax_v41',{
+        p_booking_id:b.id,
+        p_display_name:String(d.new_pax_name||'').trim()||null,
+        p_gender:d.new_pax_gender||null,
+        p_area:d.new_pax_area||null,
+        p_area_other:String(d.new_pax_area_other||'').trim()||null,
+        p_code:code
+      });
+
+      if(error)return toast(error.message,'error');
+      const result=Array.isArray(data)?data[0]:data;
+      if(result?.ok===false)return toast(result.message||'Could not create pax.','error');
+
+      await refreshOperations();
+      const created=(state.cache.pax||[]).find(p=>p.booking_id===b.id&&v24Norm(p.code).toLowerCase()===code.toLowerCase());
+      if(!created)return toast('Pax was created but could not be reloaded. Refresh and try again.','error');
+      paxId=created.id;
+    }else{
+      const target=(state.cache.pax||[]).find(p=>p.id===paxId&&p.booking_id===b.id);
+      if(!target)return toast('Selected pax was not found.','error');
+      if(v24Norm(target.code))return toast('Selected pax already has a QR / Barcode.','error');
+
+      const patch={code};
+      if(b.booking_type==='room'||b.room_id){
+        patch.assigned_room_id=d.unit_id;
+        patch.assigned_cottage_id=null;
+      }else{
+        patch.assigned_cottage_id=d.unit_id;
+        patch.assigned_room_id=null;
+      }
+
+      const {error}=await sb.from('booking_pax').update(patch).eq('id',paxId);
+      if(error)return toast(error.message,'error');
+    }
+
+    /* For a newly created pax, add the unit assignment after RPC creation. */
+    if(d.pax_id==='__new__'){
+      const patch=(b.booking_type==='room'||b.room_id)
+        ? {assigned_room_id:d.unit_id,assigned_cottage_id:null}
+        : {assigned_cottage_id:d.unit_id,assigned_room_id:null};
+
+      const {error}=await sb.from('booking_pax').update(patch).eq('id',paxId);
+      if(error)return toast(error.message,'error');
+    }
+
+    await refreshOperations();
+    const assigned=state.cache.pax.find(p=>p.id===paxId);
+    const unitName=(b.booking_type==='room'||b.room_id)
+      ? ((state.cache.rooms||[]).find(r=>r.id===d.unit_id)?.name||(state.cache.rooms||[]).find(r=>r.id===d.unit_id)?.unit_number||'Room')
+      : ((state.cache.cottages||[]).find(c=>c.id===d.unit_id)?.name||(state.cache.cottages||[]).find(c=>c.id===d.unit_id)?.unit_number||'Cottage');
+
+    closeModal();
+
+    $('#barcodeResult').innerHTML=`<div class="v55-assignment-success">
+      <div class="v55-success-icon">✓</div>
+      <h3>QR Assigned Successfully</h3>
+      <div class="report-kpis">
+        <div class="report-kpi"><span>Pax</span><strong>${esc(paxDisplayName(assigned))}</strong></div>
+        <div class="report-kpi"><span>Booking</span><strong>${esc(b.booking_number)}</strong></div>
+        <div class="report-kpi"><span>${b.room_id?'Room':'Cottage'}</span><strong>${esc(unitName)}</strong></div>
+        <div class="report-kpi"><span>QR / Barcode</span><strong>${esc(code)}</strong></div>
+      </div>
+      <div class="row-actions v55-success-actions">
+        <button class="btn btn-primary" id="v55ScanAssignedPaxNow">Scan as Existing Pax</button>
+        <button class="btn btn-soft" id="v55AssignAnotherQr">Assign Another QR</button>
+      </div>
+    </div>`;
+
+    $('#v55ScanAssignedPaxNow').onclick=()=>{
+      v55SetScanMode('pax');
+      $('#barcodeInput').value=code;
+      scanBarcode();
+    };
+    $('#v55AssignAnotherQr').onclick=()=>{
+      v55SetScanMode('assign');
+      $('#barcodeInput').focus();
+    };
+
+    toast(`${code} assigned to ${paxDisplayName(assigned)}.`);
+  };
+}
+
+/* ---------- MODE-AWARE SCAN ---------- */
+
+scanBarcode=async function(){
+  const input=$('#barcodeInput');
+  const code=v24Norm(input?.value);
+  if(!code)return;
+
+  await refreshOperations();
+
+  const mode=state.v55ScanMode||'pax';
+  const pax=v24FindPaxByCode(code);
+  const booking=v24FindBookingByCode(code);
+
+  let barcodeBooking=null;
+  if(!booking && (mode==='booking'||mode==='auto')){
+    const {data:bc}=await sb.from('barcodes')
+      .select('*')
+      .ilike('code',code)
+      .eq('is_active',true)
+      .maybeSingle();
+    if(bc?.booking_id)barcodeBooking=state.cache.bookings.find(x=>x.id===bc.booking_id);
+  }
+
+  if(mode==='pax'){
+    if(pax){
+      state.activeScanPax=pax;
+      return handlePaxScanV24(pax);
+    }
+    if(booking||barcodeBooking){
+      $('#barcodeResult').innerHTML=`<div class="empty-state">
+        <strong>This is a Booking Code</strong>
+        <p>${esc(code)}</p>
+        <small>Switch to <strong>Booking</strong> or <strong>Auto Detect</strong> mode.</small>
+        <div style="margin-top:12px"><button class="btn btn-primary" id="v55SwitchBookingMode">Open as Booking</button></div>
+      </div>`;
+      $('#v55SwitchBookingMode').onclick=()=>{
+        v55SetScanMode('booking');
+        $('#barcodeInput').value=code;
+        scanBarcode();
+      };
+      return;
+    }
+    return v55UnknownCodeResult(code,true);
+  }
+
+  if(mode==='booking'){
+    const b=booking||barcodeBooking;
+    if(b)return openBookingScanResult(b);
+    if(pax){
+      $('#barcodeResult').innerHTML=`<div class="empty-state">
+        <strong>This is an Existing Pax Code</strong>
+        <p>${esc(code)}</p>
+        <small>Switch to <strong>Existing Pax</strong> mode.</small>
+        <div style="margin-top:12px"><button class="btn btn-primary" id="v55SwitchPaxMode">Open Pax</button></div>
+      </div>`;
+      $('#v55SwitchPaxMode').onclick=()=>{
+        v55SetScanMode('pax');
+        $('#barcodeInput').value=code;
+        scanBarcode();
+      };
+      return;
+    }
+    return v55UnknownCodeResult(code,false);
+  }
+
+  if(mode==='assign'){
+    return v55OpenAssignPaxQr(code);
+  }
+
+  /* AUTO DETECT */
+  if(pax){
+    state.activeScanPax=pax;
+    return handlePaxScanV24(pax);
+  }
+  if(booking||barcodeBooking)return openBookingScanResult(booking||barcodeBooking);
+  return v55UnknownCodeResult(code,true);
+};
+
+if($('#barcodeSearchBtn'))$('#barcodeSearchBtn').onclick=scanBarcode;
+if($('#barcodeInput'))$('#barcodeInput').onkeydown=e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    scanBarcode();
+  }
+};
+
+/* Existing camera scanner already writes into #barcodeInput and calls scanBarcode().
+   Because scanBarcode is now mode-aware, camera scanning automatically follows the
+   selected Existing Pax / Booking / Assign Pax QR / Auto Detect mode. */
+
+document.addEventListener('DOMContentLoaded',()=>setTimeout(v55SetupScannerModes,180));
+setTimeout(v55SetupScannerModes,350);
+
+const v55NavigateBase=navigate;
+navigate=function(view){
+  const r=v55NavigateBase(view);
+  if(view==='barcode'){
+    setTimeout(()=>{
+      v55SetupScannerModes();
+      v55SetScanMode(state.v55ScanMode||'pax');
+    },80);
+  }
+  return r;
+};
+

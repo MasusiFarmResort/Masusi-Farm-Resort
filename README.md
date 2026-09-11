@@ -247,3 +247,20 @@ logic as the on-screen preview.
 Booking action rows now prioritize **Payment** as a visible action outside the
 `More` menu. **Coupon** is moved into `More`. Existing button handlers are
 preserved because the actual DOM button elements are moved rather than recreated.
+
+
+## V5.4 Add Pax — Provided QR/Barcode First
+Adding a pax now prioritizes the resort-provided physical QR/barcode. The Add
+Pax modal has a large code field, a **Scan Provided QR / Barcode** camera button,
+and direct support for USB/Bluetooth scanners. **Auto Generate Code** remains
+available as a secondary fallback. A pax cannot be added without a unique code.
+The category remains unclassified until entry scan or Edit Pax.
+
+
+## V5.5 Multi-Mode Barcode / QR Workflow
+The Barcode Scanner now has four explicit modes: **Existing Pax**, **Booking**,
+**Assign Pax QR**, and **Auto Detect**. A pre-printed QR can be scanned before it
+exists in the database, then assigned to an active booking, an existing pax with
+no code (or a newly created pax), and the appropriate cottage/room. Assignment
+does not automatically check the pax in; scanning the code again as Existing
+Pax continues the normal check-in/OUT/RETURN flow.
